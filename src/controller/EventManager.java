@@ -1,0 +1,170 @@
+package controller;
+
+import java.awt.EventQueue;
+import java.awt.Toolkit;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
+
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.swing.JTextField;
+
+import org.xml.sax.SAXException;
+
+import com.toedter.calendar.JDateChooser;
+
+import controller.exception.EventManagerException;
+import model.AlarmSoundTimerTask;
+import model.DataIO;
+import model.Event;
+import model.exception.EventEmptyFieldException;
+import model.exception.EventInvalidDateException;
+import view.EventWindow;
+import view.MainWindow;
+
+public class EventManager {
+	
+	ArrayList<Event> eventCollection = new ArrayList<Event>();	
+	MainWindow mainWindow;
+	DataIO dataIo = new DataIO();
+	
+	public EventManager(MainWindow mainWindow) {
+		this.mainWindow = mainWindow;
+	}
+	
+	@Override
+	public String toString() {
+		return "EventManager [eventCollection=" + eventCollection.toString() + "]";
+	}
+	
+	private void sendDataToXml(Event event, String filename) throws SAXException, IOException {
+		if (event.getIndex() == 1)
+			dataIo.writeToXml(event, filename);
+		else {
+			ArrayList<String> content = dataIo.readXml(filename);			
+			dataIo.appendXml(event, filename);			
+		}			
+	}
+
+	private void getDataFromXml(String filename) {
+		dataIo.parseXml(filename);
+	}
+	
+	public void addEvent(String titleValue, String descriptionValue, String locationValue, String startDateValue, String endDateValue, String startTimeValue, String endTimeValue) throws EventManagerException, EventInvalidDateException, EventEmptyFieldException {
+		try {
+			Event event = new Event(titleValue, descriptionValue, locationValue, startDateValue, endDateValue, startTimeValue, endTimeValue);			
+			eventCollection.add(event);
+			sendDataToXml(event, "data.xml");			
+		} catch (EventEmptyFieldException eventEmptyFieldException) {
+			throw new controller.exception.EventManagerException("Invalid values in fields, please correct");
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+	}
+	
+	public String fetchSelectedDate() {
+		return mainWindow.getEventDate();		
+	}
+	
+	public void fillStartDateField(EventWindow eventWindow) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					JTextField startDayField = eventWindow.getStartDateField();
+					startDayField.setText(fetchSelectedDate());
+					eventWindow.startDateFieldValue = fetchSelectedDate();
+					
+					JDateChooser chooser = eventWindow.getChooser();
+					chooser.setDateFormatString("yyyy-MM-dd");					
+					Date startDate = null;
+					try {
+						startDate = new SimpleDateFormat("yyyy-MM-dd").parse(fetchSelectedDate());
+					} catch (ParseException e1) {
+						e1.getMessage();
+					}
+					chooser.getDateEditor().setDate(startDate);
+					chooser.setMinSelectableDate(startDate);
+					eventWindow.setChooser(chooser);
+					
+					eventWindow.frmEventCreator.setLocationRelativeTo(null);
+					eventWindow.frmEventCreator.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+	
+	public void setAlarmGoOffDate(Date timerValue, Date startTimeValue, String startDateValue) {
+		DateFormat timerFormat = new SimpleDateFormat("HH:mm:ss");
+		DateFormat startFormat = new SimpleDateFormat("HH:mm:ss");
+		String timerTime = timerFormat.format(timerValue);
+		String eventStart = startFormat.format(startTimeValue);
+		
+		int timerHour, timerMinute, startHour, startMinute, alarmClockHour, alarmClockMinute, year, month, day;
+		timerHour = Integer.parseInt(timerTime.substring(0, 2));
+		timerMinute = Integer.parseInt(timerTime.substring(3, 5));		
+		startHour = Integer.parseInt(eventStart.substring(0, 2));
+		startMinute = Integer.parseInt(eventStart.substring(3, 5));
+		year = Integer.parseInt(startDateValue.substring(0, 4));
+		month = Integer.parseInt(startDateValue.substring(5, 7)) - 1;
+		day = Integer.parseInt(startDateValue.substring(8, 10));
+		
+		GregorianCalendar calendarStart = new GregorianCalendar(year, month, day, startHour, startMinute, 0);
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");	
+		Date start = calendarStart.getTime();
+		
+		GregorianCalendar calendarStop = new GregorianCalendar(year, month, day, startHour - timerHour, startMinute - timerMinute, 0);
+		Date goOff = calendarStop.getTime();
+		
+		goOffAlarm(goOff);
+	}
+	
+	public Thread goOffAlarm(Date goOffDate) {		
+	    Timer timer = new Timer();
+		Thread thread = new Thread(new Runnable() {
+		    private volatile boolean exit = false;			
+			
+			public void run() {
+				try {
+					while(!exit) {
+						Clip clip = AudioSystem.getClip();
+						AudioInputStream inputStream = AudioSystem.getAudioInputStream(new File("resources/alarm.wav"));
+						clip.open(inputStream);
+						clip.start();						
+					}
+				} catch (Exception e) {
+					System.err.println(e.getMessage());
+				}
+			}
+			
+			 public void stop(){
+		        exit = true;
+		    }
+			 
+		});
+		timer.schedule(new AlarmSoundTimerTask(thread), goOffDate);
+		return thread;
+	}
+	
+	public void dismissAlarm(Thread thread) throws InterruptedException {
+		thread.stop();
+        TimeUnit.MILLISECONDS.sleep(200);		
+	}
+	
+}
