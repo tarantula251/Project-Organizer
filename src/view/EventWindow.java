@@ -29,6 +29,7 @@ import javax.swing.JDialog;
 import java.awt.Color;
 import java.awt.event.ActionListener;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -358,7 +359,12 @@ public class EventWindow {
 				Date alarmDateTimeValue = null;
 
 				if (chckbxSetAlarm.isSelected())
-					alarmDateTimeValue = eventManager.setAlarmGoOffDate(timerValue, valueStart, startDateValue);
+					try {
+						alarmDateTimeValue = eventManager.setAlarmGoOffDate(timerValue, valueStart, startDateValue);
+					} catch (ParseException e2) {
+						// TODO Auto-generated catch block
+						e2.printStackTrace();
+					}
 				try {
 					eventManager.addEvent(titleValue, descriptionValue, locationValue, startDateValue, endDateValue,
 							startTimeValue, endTimeValue, alarmDateTimeValue);

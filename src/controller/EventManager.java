@@ -128,8 +128,7 @@ public class EventManager {
 			String filename = "data.xml";
 			var path = Paths.get(directory);
 			if(!Files.exists(path)) Files.createDirectory(path);
-			
-						
+									
 			sendDataToXml(event, directory + "/" + filename);
 			
 		} catch (EventEmptyFieldException eventEmptyFieldException) {
@@ -169,7 +168,7 @@ public class EventManager {
 		});
 	}
 
-	public Date setAlarmGoOffDate(Date timerValue, Date startTimeValue, String startDateValue) {
+	public Date setAlarmGoOffDate(Date timerValue, Date startTimeValue, String startDateValue) throws ParseException {
 		DateFormat timerFormat = new SimpleDateFormat("HH:mm:ss");
 		DateFormat startFormat = new SimpleDateFormat("HH:mm:ss");
 		String timerTime = timerFormat.format(timerValue);
@@ -184,14 +183,12 @@ public class EventManager {
 		month = Integer.parseInt(startDateValue.substring(5, 7)) - 1;
 		day = Integer.parseInt(startDateValue.substring(8, 10));
 
-		GregorianCalendar calendarStart = new GregorianCalendar(year, month, day, startHour, startMinute, 0);
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		Date start = calendarStart.getTime();
-
 		GregorianCalendar calendarStop = new GregorianCalendar(year, month, day, startHour - timerHour,
 				startMinute - timerMinute, 0);
-		Date goOff = calendarStop.getTime();
-
+		String resultString = sdf.format(calendarStop.getTime());		
+		Date goOff = sdf.parse(resultString);
+		
 		return goOff;
 	}
 
@@ -262,8 +259,9 @@ public class EventManager {
 						timerDateTime = eElement.getElementsByTagName("timerDateTime").item(0).getTextContent();	
 					SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 					Date timerDate = null;
-					if (!timerDateTime.isEmpty())					
+					if (!timerDateTime.isEmpty()) {
 						timerDate = simpleDateFormat.parse(timerDateTime);												
+					}
 					Event fetchedEvent = new Event(title, description, location, startDate, endDate, startTime, endTime, timerDate);				
 					index = Integer.parseInt(eElement.getAttribute("id"));
 					fetchedEvent.setIndex(index);
