@@ -129,7 +129,6 @@ public class EventWindow {
 								titleField.setFont(new Font("Tahoma", Font.PLAIN, 12));
 								titleField.setColumns(10);
 								GridBagConstraints gbc_titleField = new GridBagConstraints();
-								gbc_titleField.anchor = GridBagConstraints.NORTH;
 								gbc_titleField.fill = GridBagConstraints.HORIZONTAL;
 								gbc_titleField.insets = new Insets(0, 0, 5, 0);
 								gbc_titleField.gridwidth = 3;
@@ -150,7 +149,6 @@ public class EventWindow {
 						locationField.setFont(new Font("Tahoma", Font.PLAIN, 12));
 						locationField.setColumns(10);
 						GridBagConstraints gbc_locationField = new GridBagConstraints();
-						gbc_locationField.anchor = GridBagConstraints.NORTH;
 						gbc_locationField.fill = GridBagConstraints.HORIZONTAL;
 						gbc_locationField.insets = new Insets(0, 0, 5, 0);
 						gbc_locationField.gridwidth = 3;
@@ -191,7 +189,7 @@ public class EventWindow {
 						flowLayout.setAlignment(FlowLayout.LEFT);
 						JSpinner spinnerStart = new JSpinner(new SpinnerDateModel());
 						spinnerStart.setFont(new Font("Tahoma", Font.PLAIN, 12));
-						spinnerStart.setEditor(new JSpinner.DateEditor(spinnerStart, "hh:mm:ss"));
+						spinnerStart.setEditor(new JSpinner.DateEditor(spinnerStart, "HH:mm:ss"));
 						startTimePanel.add(spinnerStart);
 						GridBagConstraints gbc_startTimePanel = new GridBagConstraints();
 						gbc_startTimePanel.insets = new Insets(0, 0, 5, 0);
@@ -234,7 +232,7 @@ public class EventWindow {
 						flowLayout_2.setAlignment(FlowLayout.LEFT);
 						JSpinner spinnerEnd = new JSpinner(new SpinnerDateModel());
 						spinnerEnd.setFont(new Font("Tahoma", Font.PLAIN, 12));
-						spinnerEnd.setEditor(new JSpinner.DateEditor(spinnerEnd, "hh:mm:ss"));
+						spinnerEnd.setEditor(new JSpinner.DateEditor(spinnerEnd, "HH:mm:ss"));
 						endTimePanel.add(spinnerEnd);
 						GridBagConstraints gbc_endTimePanel = new GridBagConstraints();
 						gbc_endTimePanel.insets = new Insets(0, 0, 5, 0);
@@ -274,7 +272,6 @@ public class EventWindow {
 		chckbxSetAlarm.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		GridBagConstraints gbc_chckbxSetAlarm = new GridBagConstraints();
 		gbc_chckbxSetAlarm.gridwidth = 3;
-		gbc_chckbxSetAlarm.anchor = GridBagConstraints.NORTH;
 		gbc_chckbxSetAlarm.insets = new Insets(0, 0, 5, 0);
 		gbc_chckbxSetAlarm.gridx = 1;
 		gbc_chckbxSetAlarm.gridy = 5;
@@ -284,7 +281,6 @@ public class EventWindow {
 		lblAlarmWillGo.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		GridBagConstraints gbc_lblAlarmWillGo = new GridBagConstraints();
 		gbc_lblAlarmWillGo.gridwidth = 3;
-		gbc_lblAlarmWillGo.anchor = GridBagConstraints.NORTH;
 		gbc_lblAlarmWillGo.insets = new Insets(0, 0, 5, 0);
 		gbc_lblAlarmWillGo.gridx = 1;
 		gbc_lblAlarmWillGo.gridy = 6;
@@ -292,16 +288,16 @@ public class EventWindow {
 		
 		timerPanel = new JPanel();
 		JSpinner spinnerTimer = new JSpinner(new SpinnerDateModel());
+		spinnerTimer.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		//set default value
 		Calendar cal = Calendar.getInstance();
 		cal.set(Calendar.HOUR_OF_DAY, 0);
 		cal.set(Calendar.MINUTE, 0);
 		Date date = cal.getTime();
 		spinnerTimer.setValue(date);
-		spinnerTimer.setEditor(new JSpinner.DateEditor(spinnerTimer, "hh:mm"));
+		spinnerTimer.setEditor(new JSpinner.DateEditor(spinnerTimer, "HH:mm"));
 		timerPanel.add(spinnerTimer);
 		GridBagConstraints gbc_timerPanel = new GridBagConstraints();
-		gbc_timerPanel.anchor = GridBagConstraints.NORTH;
 		gbc_timerPanel.fill = GridBagConstraints.HORIZONTAL;
 		gbc_timerPanel.insets = new Insets(0, 0, 5, 0);
 		gbc_timerPanel.gridwidth = 3;
