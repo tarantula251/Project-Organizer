@@ -100,6 +100,17 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		window.setLocationRelativeTo(null);
 		window.setVisible(true);
 	}
+	
+	public void refreshEventsTable()
+	{
+		var model = (DefaultTableModel)table.getModel();
+		model.setRowCount(0);
+		for(Event event : eventManager.getEventCollection()) model.addRow(new Object[] {event.getTitle(), event.getStartDate().toString(), event.getStartTime().toString()});
+	}
+	
+	public JFrame getWindow() {
+		return window;
+	}
 
 	public EventManager getEventManager() {
 		return eventManager;
@@ -355,6 +366,8 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		if (e.getSource().equals(createEventBtn)) {
 			EventWindow eventWindow = new EventWindow(this);
 			eventManager.fillStartDateField(eventWindow);
+			eventWindow.setVisible(true);
+			if(eventWindow.getDialogResult() == 1) refreshEventsTable();
 		}
 
 	}
