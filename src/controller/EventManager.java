@@ -106,10 +106,9 @@ public class EventManager {
 		return "EventManager [eventCollection=" + eventCollection.toString() + "]";
 	}
 
-	private void sendDataToXml(Event event) throws SAXException, IOException, ParseException, EventEmptyFieldException, EventInvalidDateException, EventInvalidTimeException, TimerDateTimeException {
-
-		if (eventCollection.size() == 0) {
-			dataIo.writeToXml(event, "databank/data.xml");					
+	private void sendDataToXml(Event event, String filename) throws SAXException, IOException, ParseException, EventEmptyFieldException, EventInvalidDateException, EventInvalidTimeException, TimerDateTimeException {		
+		if (eventCollection.size() == 1) {
+			dataIo.writeToXml(event, filename);					
 		} else {
 			ArrayList<String> content = dataIo.readXml();
 			dataIo.appendXml(event);
@@ -128,11 +127,9 @@ public class EventManager {
 					startTimeValue, endTimeValue, alarmDateTimeValue);					
 			eventCollection.add(event);
 					
-			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
-			String titleDate = simpleDateFormat.format(new Date());
 			String filename = "databank/data.xml";
 						
-			sendDataToXml(event);
+			sendDataToXml(event, filename);
 			
 		} catch (EventEmptyFieldException eventEmptyFieldException) {
 			throw new controller.exception.EventManagerException("Invalid values in fields, please correct");

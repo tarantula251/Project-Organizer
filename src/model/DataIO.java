@@ -3,6 +3,7 @@ package model;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -35,6 +36,10 @@ public class DataIO {
 
 	public File getDataFile() {
 		return dataFile;
+	}
+
+	public void setDataFile(File dataFile) {
+		this.dataFile = dataFile;
 	}
 
 	public DataIO() {
@@ -99,7 +104,13 @@ public class DataIO {
 
 			DOMSource source = new DOMSource(doc);
 			dataFile = new File(filename);
+			
+			System.out.println("dupa1 ");
+			
 			StreamResult result = new StreamResult(dataFile);
+			
+			System.out.println("dupa2 ");
+
 			transformer.transform(source, result);
 
 			System.out.println("New file created and saved!");
@@ -114,14 +125,24 @@ public class DataIO {
 	public NodeList getNodeListFromXml() {
 		NodeList nList = null;
 
-		try {						
-			if (dataFile != null) {
+		try {
+			File dir = new File("C:/Users/justy/Desktop/Projects/eclipse-workspace/Project-Organizer/databank");
+			FilenameFilter filter = new FilenameFilter() {
+		         public boolean accept (File dir, String name) { 
+		            return name.equalsIgnoreCase("data.xml");
+		         } 
+			}; 
+			String[] fetchedDataFile = dir.list(filter);
+									
+			if (!fetchedDataFile[0].isEmpty() && fetchedDataFile[0] != null) {
+				setDataFile(new File(dir + "/data.xml"));
+				
 				DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 				DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-				Document doc = dBuilder.parse(dataFile);
+				Document doc = dBuilder.parse("databank/" + fetchedDataFile[0]);
 				doc.getDocumentElement().normalize();
 				nList = doc.getElementsByTagName("Event");
-			} else return null;
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
