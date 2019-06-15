@@ -1,6 +1,8 @@
 package view;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -8,17 +10,48 @@ import java.awt.event.KeyListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.lang.reflect.Array;
 import java.nio.file.NotDirectoryException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
-import javax.swing.*;
+import java.util.ArrayList;
+import java.util.Date;
+
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
 
 import controller.EventManager;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
+import javax.swing.BoxLayout;
+import java.awt.FlowLayout;
+import javax.swing.SwingConstants;
+import java.awt.Font;
+import javax.swing.JTable;
+import javax.swing.border.BevelBorder;
 
-public class MainWindow extends JFrame implements MenuListener, ActionListener, KeyListener {
+import model.Event;
+import javax.swing.table.DefaultTableModel;
+
+public class MainWindow implements MenuListener, ActionListener, KeyListener {
+
 	private static final long serialVersionUID = 1L;
 	private	JFrame window = new JFrame("Organizer App");
 	private Container contentPane = window.getContentPane();
@@ -26,24 +59,32 @@ public class MainWindow extends JFrame implements MenuListener, ActionListener, 
 	private JMenu menu, databaseSubmenu, eventsSubmenu;
 	private JMenuBar menuBar;
 	private JMenuItem eSave, eOpen, dImport, dExport, gPreferences, gAbout, gExit;
-	private JPanel calendarPanel, datePanel;	
-	private JTextField filename = new JTextField(), dir = new JTextField(), selectedDate = new JTextField();
-	private JButton createEventBtn;
-	private EventManager eventManager = new EventManager(this);
-
+	private JPanel calendarPanel;	
+	private JTextField filename = new JTextField(), dir = new JTextField();
+	private EventManager eventManager;
 	private String eventDate;
+	private JButton createEventBtn;
+	private JLabel label;
+	private JTextField textField;
+	private JLabel label_1;
+	private DefaultTableModel tableModel;
+	private JScrollPane scrollPane;
+	private JTable table;
+	
+	public MainWindow() throws LineUnavailableException, IOException, UnsupportedAudioFileException {		
+		eventManager = new EventManager(this);
+		initialize();	    
+	}
 
-	public MainWindow() {
-	    window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	private void initialize() {
+		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	    addCalendar();
 	    addMenuBar();
-	    addCreateEventButton();
-
-	    window.setBounds(0, 0, 500, 300);
+	    window.setBounds(0, 0, 835, 659);
 	    window.setLocationRelativeTo(null);
 		window.setVisible(true);
 	}
-	
+
 	public EventManager getEventManager() {
 		return eventManager;
 	}
@@ -60,18 +101,88 @@ public class MainWindow extends JFrame implements MenuListener, ActionListener, 
 	    CalendarComponent calendar = new CalendarComponent();
 	    calendarPanel = calendar.getCalendarPanel();
 	    showSelectedDate(calendar);
-	    contentPane.add(calendarPanel, BorderLayout.CENTER);
+	    
+	    GridBagConstraints gbc_calendar = new GridBagConstraints();
+	    gbc_calendar.insets = new Insets(0, 0, 5, 5);
+	    gbc_calendar.gridx = 1;
+	    gbc_calendar.gridy = 1;
+	    contentPane.add(calendarPanel, gbc_calendar);
+	    
+	    label_1 = new JLabel("View your events: ");
+	    label_1.setFont(new Font("Tahoma", Font.PLAIN, 12));
+	    GridBagConstraints gbc_label_1 = new GridBagConstraints();
+	    gbc_label_1.anchor = GridBagConstraints.SOUTH;
+	    gbc_label_1.insets = new Insets(0, 0, 5, 5);
+	    gbc_label_1.gridx = 3;
+	    gbc_label_1.gridy = 0;
+	    window.getContentPane().add(label_1, gbc_label_1);
+	    	    	    	 	     
+	    scrollPane = new JScrollPane();
+	    GridBagConstraints gbc_scrollPane = new GridBagConstraints();
+	    gbc_scrollPane.insets = new Insets(0, 0, 5, 5);
+	    gbc_scrollPane.fill = GridBagConstraints.VERTICAL;
+	    gbc_scrollPane.gridx = 3;
+	    gbc_scrollPane.gridy = 1;
+	    window.getContentPane().add(scrollPane, gbc_scrollPane);
+	    
+	    table = new JTable();
+	    table.setModel(new DefaultTableModel(
+	    	new Object[][] {
+	    		{"101","Amit","670000"}
+	    	},   
+	    	new String[] {
+	    		"Title", "Start date", "Start time"
+	    	}
+	    ));
+	    scrollPane.setViewportView(table);
+	    addRowToTable();
+	    
+	    label = new JLabel("Selected date: ");
+	    label.setFont(new Font("Tahoma", Font.PLAIN, 12));
+	    GridBagConstraints gbc_label = new GridBagConstraints();
+	    gbc_label.insets = new Insets(0, 0, 5, 5);
+	    gbc_label.gridx = 1;
+	    gbc_label.gridy = 2;
+	    window.getContentPane().add(label, gbc_label);
+	    
+	    textField = new JTextField();
+	    textField.setText("2019-06-15");
+	    textField.setFont(new Font("Tahoma", Font.PLAIN, 12));
+	    GridBagConstraints gbc_textField = new GridBagConstraints();
+	    gbc_textField.insets = new Insets(0, 0, 5, 5);
+	    gbc_textField.gridx = 2;
+	    gbc_textField.gridy = 2;
+	    window.getContentPane().add(textField, gbc_textField);
+
+	    createEventBtn = new JButton("Create event");
+	    createEventBtn.setFont(new Font("Tahoma", Font.PLAIN, 12));
+	    GridBagConstraints gbc_createEventBtn = new GridBagConstraints();
+	    gbc_createEventBtn.insets = new Insets(0, 0, 0, 5);
+	    gbc_createEventBtn.gridx = 1;
+	    gbc_createEventBtn.gridy = 3;
+	    window.getContentPane().add(createEventBtn, gbc_createEventBtn);
+	}
+	
+	private void addRowToTable() {
+		ArrayList<Event> eventsArray = eventManager.getEventCollection();
+		DefaultTableModel model = (DefaultTableModel) table.getModel();
+
+//		for (Event event : eventsArray) {
+			for (int i = 0; i < 10; i++) {
+
+			model.addRow(new Object[] {
+				"101","Amit","670000"                   
+                } 
+			);						
+		}
+		
 	}
 		
-	private void showSelectedDate(CalendarComponent calendar) {		
-		datePanel = new JPanel();
-		datePanel.add(new JLabel("Selected date:"));
-		
+	private void showSelectedDate(CalendarComponent calendar) {				
 		//initial value in date label
     	DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		Date today = new Date();
 		setEventDate(dateFormat.format(today));
-		selectedDate.setText(eventDate);
 		
 		//updating value in date label
 		calendar.getCalendar().getDayChooser().setMinSelectableDate(today);
@@ -79,21 +190,18 @@ public class MainWindow extends JFrame implements MenuListener, ActionListener, 
 		    @Override
 		    public void propertyChange(PropertyChangeEvent e) {
 		    	Date currentDate = calendar.getCalendar().getDate();
-		    	setEventDate(dateFormat.format(currentDate));
-		    	selectedDate.setText(getEventDate());	        		    
+		    	setEventDate(dateFormat.format(currentDate));		    	
+		    	textField.setText(getEventDate());	        		    
 		    }
-	    });		
-    	datePanel.add(selectedDate);		
-		contentPane.add(datePanel, BorderLayout.BEFORE_FIRST_LINE);		
+	    });
+    	GridBagLayout gridBagLayout = new GridBagLayout();
+    	gridBagLayout.columnWidths = new int[]{0, 30, 35, 80, 25, 0};
+    	gridBagLayout.rowHeights = new int[]{35, 150, 50, 35, 0};
+    	gridBagLayout.columnWeights = new double[]{1.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+    	gridBagLayout.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+    	window.getContentPane().setLayout(gridBagLayout);
 	}	
 
-	private void addCreateEventButton() {
-		createEventBtn = new JButton("Create event");
-		createEventBtn.addActionListener(this);
-        contentPane.add(createEventBtn, BorderLayout.SOUTH);
-
-	}
-	
 	private void addMenuBar() {		
 		this.addKeyListener(this);
 				
@@ -150,6 +258,11 @@ public class MainWindow extends JFrame implements MenuListener, ActionListener, 
 		menu.add(gExit);
 	
 		window.setJMenuBar(menuBar);  
+	}
+
+	private void addKeyListener(MainWindow mainWindow) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	@Override
@@ -258,7 +371,10 @@ public class MainWindow extends JFrame implements MenuListener, ActionListener, 
 			eventManager.fillStartDateField(eventWindow);				
         }
 		
-	}		
+	}
+	
+	public void showPane(String title, String infoMessage) {
+		JOptionPane.showMessageDialog(null, infoMessage, title, JOptionPane.INFORMATION_MESSAGE);
+
+	}
 }
-
-

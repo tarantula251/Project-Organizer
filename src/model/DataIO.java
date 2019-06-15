@@ -80,7 +80,11 @@ public class DataIO {
 				Element endTime = doc.createElement("endTime");
 				endTime.appendChild(doc.createTextNode(event.getEndTime()));
 				eventHeader.appendChild(endTime);				
-			}			
+			}	
+			
+			Element timerDateTime = doc.createElement("timerDateTime");
+			timerDateTime.appendChild(doc.createTextNode(event.getAlarmDateTime().toString()));
+			eventHeader.appendChild(timerDateTime);
 			
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			Transformer transformer = transformerFactory.newTransformer();
@@ -130,6 +134,7 @@ public class DataIO {
 					values.add("startTime: " + eElement.getElementsByTagName("startTime").item(0).getTextContent());
 					values.add("endDate: " + eElement.getElementsByTagName("endDate").item(0).getTextContent());
 					values.add("endTime: " + eElement.getElementsByTagName("endTime").item(0).getTextContent());
+					values.add("timerDateTime: " + eElement.getElementsByTagName("timerDateTime").item(0).getTextContent());
 				}
 			}
 		} catch (Exception e) {
@@ -192,6 +197,10 @@ public class DataIO {
 				endTime.appendChild(doc.createTextNode(event.getEndTime()));
 				eventHeader.appendChild(endTime);
 			}
+			
+			Element timerDateTime = doc.createElement("timerDateTime");
+			timerDateTime.appendChild(doc.createTextNode(event.getAlarmDateTime().toString()));
+			eventHeader.appendChild(timerDateTime);
 			
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			Transformer transformer = transformerFactory.newTransformer();

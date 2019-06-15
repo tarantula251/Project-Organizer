@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <EventsCollection>
     <Event id="1">
-        <title>cc</title>
-        <description>dfasdf</description>
-        <location>ss</location>
-        <startDate>2019-06-13</startDate>
-        <startTime>14:22:24</startTime>
-        <endDate>2019-06-13</endDate>
-        <endTime>23:22:24</endTime>
+        <title>d</title>
+        <description>d</description>
+        <location>v</location>
+        <startDate>2019-06-15</startDate>
+        <startTime>11:23:25</startTime>
+        <endDate>2019-06-15</endDate>
+        <endTime>11:22:25</endTime>
+        <timerDateTime>Sat Jun 15 11:23:00 CEST 2019</timerDateTime>
     </Event>
 </EventsCollection>

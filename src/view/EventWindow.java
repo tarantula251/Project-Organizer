@@ -32,6 +32,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.awt.event.ActionEvent;
+import javax.swing.JCheckBox;
 
 public class EventWindow {
 
@@ -39,7 +40,7 @@ public class EventWindow {
 	public JFrame frmEventCreator;
 	public JTextField titleField;
 	public JTextField locationField;
-	public JTextField startDateField;
+	public JDateChooser startDateField;
 	private JLabel lblEndDate;
 	private JLabel lblLocation;
 	private JLabel lblDescription;
@@ -47,12 +48,13 @@ public class EventWindow {
 	public JTextArea descriptionArea;
 	private JButton btnCancel;
 	private JButton btnSubmit;
+	public JPanel startDatePanel;
 	public JPanel endDatePanel;
+	public JDateChooser chooserStart = new JDateChooser();
 	public JDateChooser chooser = new JDateChooser();
 	public SpinnerDateModel spinnerDateModel;
 	public JSpinner spinner;
 	private EventManager eventManager;
-	private JButton btnSetAlarm;
 	private JLabel lblStartTime;
 	private JLabel lblEndTime;
 	private JPanel startTimePanel;
@@ -61,7 +63,7 @@ public class EventWindow {
 	private JLabel lblAlarmWillGo;
 	private JLabel lblBeforeEventsStart;
 	private JPanel timerPanel;
-	private JButton btnDismiss;
+	private JCheckBox chckbxSetAlarm;
 
 	public JDateChooser getChooser() {
 		return chooser;
@@ -82,11 +84,11 @@ public class EventWindow {
 	}
 
 
-	public JTextField getStartDateField() {
+	public JDateChooser getStartDateField() {
 		return startDateField;
 	}
 
-	public void setStartDateField(JTextField startDateField) {
+	public void setStartDateField(JDateChooser startDateField) {
 		this.startDateField = startDateField;
 	}
 
@@ -104,9 +106,9 @@ public class EventWindow {
 		frmEventCreator.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[] { 126, 281, 0 };
-		gridBagLayout.rowHeights = new int[] { 45, 45, 45, 45, 45, 45, 100, 45, 45, 30, 45, 0 };
+		gridBagLayout.rowHeights = new int[] { 45, 45, 45, 45, 45, 45, 100, 0, 30, 30, 30, 45, 0 };
 		gridBagLayout.columnWeights = new double[] { 1.0, 1.0, Double.MIN_VALUE };
-		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
 		frmEventCreator.getContentPane().setLayout(gridBagLayout);
 
 		JLabel lblTitle = new JLabel("Title: ");
@@ -153,14 +155,14 @@ public class EventWindow {
 		gbc_lblStartDate.gridy = 2;
 		frmEventCreator.getContentPane().add(lblStartDate, gbc_lblStartDate);
 
-		startDateField = new JTextField();
+		startDateField = new JDateChooser();
 		startDateField.setFont(new Font("Tahoma", Font.PLAIN, 12));
-		startDateField.setColumns(10);
 		GridBagConstraints gbc_startDateField = new GridBagConstraints();
 		gbc_startDateField.anchor = GridBagConstraints.WEST;
 		gbc_startDateField.insets = new Insets(0, 0, 5, 0);
 		gbc_startDateField.gridx = 1;
 		gbc_startDateField.gridy = 2;
+		startDateField.setDateFormatString("yyyy-MM-dd");						
 		frmEventCreator.getContentPane().add(startDateField, gbc_startDateField);
 		
 		lblStartTime = new JLabel("Start time: ");
@@ -178,7 +180,7 @@ public class EventWindow {
 		gbc_startTimePanel.gridx = 1;
 		gbc_startTimePanel.gridy = 3;
 		JSpinner spinnerStart = new JSpinner(new SpinnerDateModel());
-	//	startTimePanel.add(addTimeSpinner(spinnerStart, "HH:mm:ss"));
+		startTimePanel.add(addTimeSpinner(spinnerStart, "HH:mm:ss"));
 		frmEventCreator.getContentPane().add(startTimePanel, gbc_startTimePanel);
 
 		lblEndDate = new JLabel("End date: ");
@@ -213,7 +215,7 @@ public class EventWindow {
 		gbc_endTimePanel.gridx = 1;
 		gbc_endTimePanel.gridy = 5;
 		JSpinner spinnerEnd = new JSpinner(new SpinnerDateModel());
-	//	endTimePanel.add(addTimeSpinner(spinnerEnd, "HH:mm:ss"));
+		endTimePanel.add(addTimeSpinner(spinnerEnd, "HH:mm:ss"));
 		frmEventCreator.getContentPane().add(endTimePanel, gbc_endTimePanel);
 
 		lblDescription = new JLabel("Description: ");
@@ -250,30 +252,20 @@ public class EventWindow {
 			}
 		});
 		
-		btnSetAlarm = new JButton("Set alarm");
-		btnSetAlarm.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {     
-                Date timerValue = (Date) ((JSpinner) timerPanel.getComponent(0)).getValue();     
-                Date startTimeValue = (Date) ((JSpinner) startTimePanel.getComponent(0)).getValue();
-				String startDateValue = startDateField.getText();	
-				eventManager.setAlarmGoOffDate(timerValue, startTimeValue, startDateValue);								
-			}
-		});
-		btnSetAlarm.setForeground(Color.BLACK);
-		btnSetAlarm.setFont(new Font("Tahoma", Font.PLAIN, 12));
-		btnSetAlarm.setBackground(new Color(153, 204, 255));
-		GridBagConstraints gbc_btnSetAlarm = new GridBagConstraints();
-		gbc_btnSetAlarm.insets = new Insets(0, 0, 5, 5);
-		gbc_btnSetAlarm.gridx = 0;
-		gbc_btnSetAlarm.gridy = 7;
-		frmEventCreator.getContentPane().add(btnSetAlarm, gbc_btnSetAlarm);
+		chckbxSetAlarm = new JCheckBox("Set alarm");
+		chckbxSetAlarm.setFont(new Font("Tahoma", Font.PLAIN, 12));
+		GridBagConstraints gbc_chckbxSetAlarm = new GridBagConstraints();
+		gbc_chckbxSetAlarm.insets = new Insets(0, 0, 5, 0);
+		gbc_chckbxSetAlarm.gridx = 1;
+		gbc_chckbxSetAlarm.gridy = 7;
+		frmEventCreator.getContentPane().add(chckbxSetAlarm, gbc_chckbxSetAlarm);
 		
 		lblAlarmWillGo = new JLabel("Alarm will go off ");
 		lblAlarmWillGo.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		GridBagConstraints gbc_lblAlarmWillGo = new GridBagConstraints();
 		gbc_lblAlarmWillGo.insets = new Insets(0, 0, 5, 0);
 		gbc_lblAlarmWillGo.gridx = 1;
-		gbc_lblAlarmWillGo.gridy = 7;
+		gbc_lblAlarmWillGo.gridy = 8;
 		frmEventCreator.getContentPane().add(lblAlarmWillGo, gbc_lblAlarmWillGo);
 		
 		timerPanel = new JPanel();
@@ -281,27 +273,13 @@ public class EventWindow {
 		gbc_timerPanel.insets = new Insets(0, 0, 5, 0);
 		gbc_timerPanel.fill = GridBagConstraints.BOTH;
 		gbc_timerPanel.gridx = 1;
-		gbc_timerPanel.gridy = 8;
+		gbc_timerPanel.gridy = 9;
 		JSpinner spinnerTimer = new JSpinner(new SpinnerDateModel());
 		//set default value
 		Calendar cal = Calendar.getInstance();
 		cal.set(Calendar.HOUR_OF_DAY, 0);
 		cal.set(Calendar.MINUTE, 0);
 		Date date = cal.getTime();
-		
-		btnDismiss = new JButton("Dismiss");
-		btnDismiss.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				
-			}
-		});
-		btnDismiss.setBackground(new Color(221, 160, 221));
-		btnDismiss.setFont(new Font("Tahoma", Font.PLAIN, 12));
-		GridBagConstraints gbc_btnDismiss = new GridBagConstraints();
-		gbc_btnDismiss.insets = new Insets(0, 0, 5, 5);
-		gbc_btnDismiss.gridx = 0;
-		gbc_btnDismiss.gridy = 8;
-		frmEventCreator.getContentPane().add(btnDismiss, gbc_btnDismiss);
 		spinnerTimer.setValue(date);
 		timerPanel.add(addTimeSpinner(spinnerTimer, "HH:mm"));
 		frmEventCreator.getContentPane().add(timerPanel, gbc_timerPanel);
@@ -311,7 +289,7 @@ public class EventWindow {
 		GridBagConstraints gbc_lblBeforeEventsStart = new GridBagConstraints();
 		gbc_lblBeforeEventsStart.insets = new Insets(0, 0, 5, 0);
 		gbc_lblBeforeEventsStart.gridx = 1;
-		gbc_lblBeforeEventsStart.gridy = 9;
+		gbc_lblBeforeEventsStart.gridy = 10;
 		frmEventCreator.getContentPane().add(lblBeforeEventsStart, gbc_lblBeforeEventsStart);
 		btnCancel.setForeground(Color.BLACK);
 		btnCancel.setBackground(new Color(255, 51, 102));
@@ -320,7 +298,7 @@ public class EventWindow {
 		gbc_btnCancel.anchor = GridBagConstraints.SOUTH;
 		gbc_btnCancel.insets = new Insets(0, 0, 0, 5);
 		gbc_btnCancel.gridx = 0;
-		gbc_btnCancel.gridy = 10;
+		gbc_btnCancel.gridy = 11;
 		frmEventCreator.getContentPane().add(btnCancel, gbc_btnCancel);
 
 		btnSubmit = new JButton("Submit");
@@ -330,19 +308,23 @@ public class EventWindow {
 				titleValue = titleField.getText();
 				descriptionValue = descriptionArea.getText();
 				locationValue = locationField.getText();
-				startDateValue = startDateField.getText();
+				DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");				
+				startDateValue = dateFormat.format(startDateField.getDate());	
 				Date fetchedDate = ((JDateChooser) endDatePanel.getComponent(0)).getDate();
-				DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 				endDateValue = dateFormat.format(fetchedDate);			
 				Date valueStart = (Date) ((JSpinner) startTimePanel.getComponent(0)).getValue();
                 SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
                 startTimeValue = format.format(valueStart);                 
 				Date valueEnd = (Date) ((JSpinner) endTimePanel.getComponent(0)).getValue();
-                endTimeValue = format.format(valueEnd);                   
-
+                endTimeValue = format.format(valueEnd);    
+                Date timerValue = (Date) ((JSpinner) timerPanel.getComponent(0)).getValue();    
+                Date alarmDateTimeValue = null;
+                
+                if (chckbxSetAlarm.isSelected())
+                	alarmDateTimeValue = eventManager.setAlarmGoOffDate(timerValue, valueStart, startDateValue);
 				try {
-					eventManager.addEvent(titleValue, descriptionValue, locationValue, startDateValue, endDateValue, startTimeValue, endTimeValue);
-					showSuccessPane("Event created successfully");
+					eventManager.addEvent(titleValue, descriptionValue, locationValue, startDateValue, endDateValue, startTimeValue, endTimeValue, alarmDateTimeValue);
+					showPane("Success", "Event created successfully");
 					frmEventCreator.dispose();
 				} catch (EventManagerException ex) {
 					showErrorPane(ex.getMessage());
@@ -361,7 +343,7 @@ public class EventWindow {
 		GridBagConstraints gbc_btnSubmit = new GridBagConstraints();
 		gbc_btnSubmit.anchor = GridBagConstraints.SOUTH;
 		gbc_btnSubmit.gridx = 1;
-		gbc_btnSubmit.gridy = 10;
+		gbc_btnSubmit.gridy = 11;
 		frmEventCreator.getContentPane().add(btnSubmit, gbc_btnSubmit);
 
 	}
@@ -371,8 +353,8 @@ public class EventWindow {
 
 	}
 
-	private void showSuccessPane(String infoMessage) {
-		JOptionPane.showMessageDialog(null, infoMessage, "Success", JOptionPane.INFORMATION_MESSAGE);
+	public void showPane(String title, String infoMessage) {
+		JOptionPane.showMessageDialog(null, infoMessage, title, JOptionPane.INFORMATION_MESSAGE);
 
 	}
 }

@@ -1,12 +1,18 @@
 package model;
 
+import java.util.Date;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.GregorianCalendar;
 
 import model.exception.EventEmptyFieldException;
 import model.exception.EventInvalidDateException;
 import model.exception.EventInvalidTimeException;
+import model.exception.TimerDateTimeException;
 
 public class Event {
 	private static int counter = 0; 
@@ -18,8 +24,9 @@ public class Event {
 	private String startTime;
 	private String endTime;
 	private Integer index;
+	private Date alarmDateTime;
 
-	public Event(String title, String description, String location, String startDate, String endDate, String startTime, String endTime) throws EventEmptyFieldException, EventInvalidDateException, EventInvalidTimeException {
+	public Event(String title, String description, String location, String startDate, String endDate, String startTime, String endTime, Date alarmDateTimeValue) throws EventEmptyFieldException, EventInvalidDateException, EventInvalidTimeException, ParseException, TimerDateTimeException {
 		setTitle(title);
 		setDescription(description);
 		setLocation(location);
@@ -27,9 +34,31 @@ public class Event {
 		setEndDate(endDate);	
 		setStartTime(startTime);
 		setEndTime(endTime);
+		setAlarmDateTime(alarmDateTimeValue);		
 		index = ++counter;		
 	}
 	
+	public Date getAlarmDateTime() {
+		return alarmDateTime;
+	}
+
+	public void setAlarmDateTime(Date alarmDateTime) throws ParseException, TimerDateTimeException {
+		if (alarmDateTime != null) {			
+			int comparedToStart = alarmDateTime.compareTo(parseStringToDate(startDate, startTime));
+			int comparedToEnd = alarmDateTime.compareTo(parseStringToDate(endDate, endTime));
+			if (comparedToStart != -1) {
+				throw new TimerDateTimeException("Timer time cannot be after event's start date");				
+			}			
+		}
+		this.alarmDateTime = alarmDateTime;
+	}
+	
+	private Date parseStringToDate(String date, String time) throws ParseException {		
+		DateFormat resultFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Date result = (Date) resultFormat.parse(date + " " + time);		
+		return result;
+	}
+
 	public void validateTime(String time) throws EventInvalidTimeException {
 		try {
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");			
