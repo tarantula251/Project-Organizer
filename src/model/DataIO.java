@@ -34,7 +34,7 @@ public class DataIO {
 	public DataIO() {
 	}
 
-	public void writeToXml(Event event, String filename) {
+	public void writeToXml(Event event, String filename) {		
 		try {
 			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
@@ -81,10 +81,11 @@ public class DataIO {
 				endTime.appendChild(doc.createTextNode(event.getEndTime()));
 				eventHeader.appendChild(endTime);				
 			}	
-			
-			Element timerDateTime = doc.createElement("timerDateTime");
-			timerDateTime.appendChild(doc.createTextNode(event.getAlarmDateTime().toString()));
-			eventHeader.appendChild(timerDateTime);
+			if(event.getAlarmDateTime() != null) {
+				Element timerDateTime = doc.createElement("timerDateTime");
+				timerDateTime.appendChild(doc.createTextNode(event.getAlarmDateTime().toString()));
+				eventHeader.appendChild(timerDateTime);
+			}
 			
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			Transformer transformer = transformerFactory.newTransformer();

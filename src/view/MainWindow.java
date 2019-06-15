@@ -14,8 +14,10 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.nio.file.NotDirectoryException;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 
 import javax.sound.sampled.LineUnavailableException;
@@ -67,16 +69,15 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 	private JLabel label;
 	private JTextField textField;
 	private JLabel label_1;
-	private DefaultTableModel tableModel;
 	private JScrollPane scrollPane;
 	private JTable table;
 	
-	public MainWindow() throws LineUnavailableException, IOException, UnsupportedAudioFileException {		
+	public MainWindow() throws LineUnavailableException, IOException, UnsupportedAudioFileException, ParseException {		
 		eventManager = new EventManager(this);
 		initialize();	    
 	}
 
-	private void initialize() {
+	private void initialize() throws ParseException {
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	    addCalendar();
 	    addMenuBar();
@@ -97,7 +98,7 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		this.eventDate = eventDate;
 	}
 	
-	private void addCalendar() {		
+	private void addCalendar() throws ParseException {		
 	    CalendarComponent calendar = new CalendarComponent();
 	    calendarPanel = calendar.getCalendarPanel();
 	    showSelectedDate(calendar);
@@ -135,7 +136,7 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 	    	}
 	    ));
 	    scrollPane.setViewportView(table);
-	    addRowToTable();
+	    eventManager.addRowToTable(table);
 	    
 	    label = new JLabel("Selected date: ");
 	    label.setFont(new Font("Tahoma", Font.PLAIN, 12));
@@ -155,27 +156,13 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 	    window.getContentPane().add(textField, gbc_textField);
 
 	    createEventBtn = new JButton("Create event");
+	    createEventBtn.addActionListener(this);
 	    createEventBtn.setFont(new Font("Tahoma", Font.PLAIN, 12));
 	    GridBagConstraints gbc_createEventBtn = new GridBagConstraints();
 	    gbc_createEventBtn.insets = new Insets(0, 0, 0, 5);
 	    gbc_createEventBtn.gridx = 1;
 	    gbc_createEventBtn.gridy = 3;
 	    window.getContentPane().add(createEventBtn, gbc_createEventBtn);
-	}
-	
-	private void addRowToTable() {
-		ArrayList<Event> eventsArray = eventManager.getEventCollection();
-		DefaultTableModel model = (DefaultTableModel) table.getModel();
-
-//		for (Event event : eventsArray) {
-			for (int i = 0; i < 10; i++) {
-
-			model.addRow(new Object[] {
-				"101","Amit","670000"                   
-                } 
-			);						
-		}
-		
 	}
 		
 	private void showSelectedDate(CalendarComponent calendar) {				
@@ -365,8 +352,8 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		if (e.getSource().equals(gExit)) {
 			System.exit(0);		
         }
-		
-		if (e.getSource().equals(createEventBtn)) {
+				
+		if (e.getSource().equals(createEventBtn)) {			
 			EventWindow eventWindow = new EventWindow(this);
 			eventManager.fillStartDateField(eventWindow);				
         }

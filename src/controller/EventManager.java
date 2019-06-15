@@ -24,7 +24,9 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
+import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.table.DefaultTableModel;
 
 import org.xml.sax.SAXException;
 
@@ -98,9 +100,10 @@ public class EventManager {
 	}
 
 	private void sendDataToXml(Event event, String filename) throws SAXException, IOException {
-		if (event.getIndex() == 1)
+		
+		if (event.getIndex() == 1) {
 			dataIo.writeToXml(event, filename);
-		else {
+		} else {
 			ArrayList<String> content = dataIo.readXml(filename);
 			dataIo.appendXml(event, filename);
 		}
@@ -117,7 +120,10 @@ public class EventManager {
 			Event event = new Event(titleValue, descriptionValue, locationValue, startDateValue, endDateValue,
 					startTimeValue, endTimeValue, alarmDateTimeValue);
 			eventCollection.add(event);
-			sendDataToXml(event, "data.xml");
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
+			String titleDate = simpleDateFormat.format(new Date());
+			String filename = "databank/data-" + titleDate + ".xml";
+			sendDataToXml(event, filename);
 		} catch (EventEmptyFieldException eventEmptyFieldException) {
 			throw new controller.exception.EventManagerException("Invalid values in fields, please correct");
 		} catch (Exception e) {
@@ -132,7 +138,7 @@ public class EventManager {
 	public void fillStartDateField(EventWindow eventWindow) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
-				try {
+				try {					
 					Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse(fetchSelectedDate());
 
 					JDateChooser startDayField = eventWindow.getStartDateField();
@@ -207,4 +213,22 @@ public class EventManager {
 		alarmDismissed = true;
 	}
 
+	public void addRowToTable(JTable table) throws ParseException {
+		DefaultTableModel model = (DefaultTableModel) table.getModel();
+		Date currentDate = new Date();
+		
+		for (Event event : getEventCollection()) {
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			Date eventDate = simpleDateFormat.parse(event.getStartDate());
+			
+			int comparedTime = eventDate.compareTo(currentDate);
+			if (comparedTime > 0) {
+				model.addRow(new Object[] {
+						event.getTitle(), event.getStartDate(), event.getStartTime()                
+                	} 
+				);									
+			}					
+		}	
+		
+	}
 }
