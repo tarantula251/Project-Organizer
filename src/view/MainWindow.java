@@ -99,6 +99,7 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		window.setBounds(0, 0, 577, 326);
 		window.setLocationRelativeTo(null);
 		window.setVisible(true);
+		refreshEventsTable();
 	}
 	
 	public void refreshEventsTable()

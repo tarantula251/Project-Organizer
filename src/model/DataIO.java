@@ -47,8 +47,6 @@ public class DataIO {
 
 	public void writeToXml(Event event, String filename) {
 
-		System.out.println("write filename " + filename);
-
 		try {
 			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
@@ -105,11 +103,7 @@ public class DataIO {
 			DOMSource source = new DOMSource(doc);
 			dataFile = new File(filename);
 			
-			System.out.println("dupa1 ");
-			
 			StreamResult result = new StreamResult(dataFile);
-			
-			System.out.println("dupa2 ");
 
 			transformer.transform(source, result);
 
@@ -126,17 +120,15 @@ public class DataIO {
 		NodeList nList = null;
 
 		try {
-			File dir = new File("C:/Users/justy/Desktop/Projects/eclipse-workspace/Project-Organizer/databank");
+			File dir = new File("databank");
 			FilenameFilter filter = new FilenameFilter() {
 		         public boolean accept (File dir, String name) { 
 		            return name.equalsIgnoreCase("data.xml");
 		         } 
 			}; 
 			String[] fetchedDataFile = dir.list(filter);
-									
-			if (!fetchedDataFile[0].isEmpty() && fetchedDataFile[0] != null) {
+			if (fetchedDataFile != null) {
 				setDataFile(new File(dir + "/data.xml"));
-				
 				DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 				DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 				Document doc = dBuilder.parse("databank/" + fetchedDataFile[0]);

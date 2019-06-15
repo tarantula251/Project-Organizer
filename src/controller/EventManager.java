@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -110,15 +112,10 @@ public class EventManager {
 		if (eventCollection.size() == 1) {
 			dataIo.writeToXml(event, filename);					
 		} else {
-			ArrayList<String> content = dataIo.readXml();
 			dataIo.appendXml(event);
 		}
 	}
-
-	private void getDataFromXml(String filename) {
-		//dataIo.parseXml(filename);
-	}
-
+	
 	public void addEvent(String titleValue, String descriptionValue, String locationValue, String startDateValue,
 			String endDateValue, String startTimeValue, String endTimeValue, Date alarmDateTimeValue)
 			throws EventManagerException, EventInvalidDateException, EventEmptyFieldException {
@@ -127,9 +124,13 @@ public class EventManager {
 					startTimeValue, endTimeValue, alarmDateTimeValue);					
 			eventCollection.add(event);
 					
-			String filename = "databank/data.xml";
+			String directory = "databank";
+			String filename = "data.xml";
+			var path = Paths.get(directory);
+			if(!Files.exists(path)) Files.createDirectory(path);
+			
 						
-			sendDataToXml(event, filename);
+			sendDataToXml(event, directory + "/" + filename);
 			
 		} catch (EventEmptyFieldException eventEmptyFieldException) {
 			throw new controller.exception.EventManagerException("Invalid values in fields, please correct");
