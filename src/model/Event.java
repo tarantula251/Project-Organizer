@@ -38,6 +38,10 @@ public class Event {
 		index = ++counter;		
 	}
 	
+	public void setIndex(Integer index) {
+		this.index = index;
+	}
+	
 	public Date getAlarmDateTime() {
 		return alarmDateTime;
 	}
@@ -45,7 +49,6 @@ public class Event {
 	public void setAlarmDateTime(Date alarmDateTime) throws ParseException, TimerDateTimeException {
 		if (alarmDateTime != null) {			
 			int comparedToStart = alarmDateTime.compareTo(parseStringToDate(startDate, startTime));
-			int comparedToEnd = alarmDateTime.compareTo(parseStringToDate(endDate, endTime));
 			if (comparedToStart != -1) {
 				throw new TimerDateTimeException("Timer time cannot be after event's start date");				
 			}			

@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
@@ -28,13 +29,21 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-
 public class DataIO {
+
+	private File dataFile;
+
+	public File getDataFile() {
+		return dataFile;
+	}
 
 	public DataIO() {
 	}
 
-	public void writeToXml(Event event, String filename) {		
+	public void writeToXml(Event event, String filename) {
+
+		System.out.println("write filename " + filename);
+
 		try {
 			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
@@ -66,38 +75,35 @@ public class DataIO {
 			startDate.appendChild(doc.createTextNode(event.getStartDate()));
 			eventHeader.appendChild(startDate);
 
-			if(event.getStartTime() != null) {
-				Element startTime = doc.createElement("startTime");
-				startTime.appendChild(doc.createTextNode(event.getStartTime()));
-				eventHeader.appendChild(startTime);				
-			}
-			
+			Element startTime = doc.createElement("startTime");
+			startTime.appendChild(doc.createTextNode(event.getStartTime()));
+			eventHeader.appendChild(startTime);
+
 			Element endDate = doc.createElement("endDate");
 			endDate.appendChild(doc.createTextNode(event.getEndDate()));
 			eventHeader.appendChild(endDate);
-			
-			if(event.getEndTime() != null) {
-				Element endTime = doc.createElement("endTime");
-				endTime.appendChild(doc.createTextNode(event.getEndTime()));
-				eventHeader.appendChild(endTime);				
-			}	
-			if(event.getAlarmDateTime() != null) {
+
+			Element endTime = doc.createElement("endTime");
+			endTime.appendChild(doc.createTextNode(event.getEndTime()));
+			eventHeader.appendChild(endTime);
+
+			if (event.getAlarmDateTime() != null) {
 				Element timerDateTime = doc.createElement("timerDateTime");
 				timerDateTime.appendChild(doc.createTextNode(event.getAlarmDateTime().toString()));
 				eventHeader.appendChild(timerDateTime);
 			}
-			
+
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			Transformer transformer = transformerFactory.newTransformer();
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-			
-			DOMSource source = new DOMSource(doc);			
-			File outputFile = new File(filename);
-			StreamResult result = new StreamResult(outputFile);
+
+			DOMSource source = new DOMSource(doc);
+			dataFile = new File(filename);
+			StreamResult result = new StreamResult(dataFile);
 			transformer.transform(source, result);
-						
+
 			System.out.println("New file created and saved!");
-				
+
 		} catch (ParserConfigurationException pce) {
 			pce.printStackTrace();
 		} catch (TransformerException tfe) {
@@ -105,62 +111,48 @@ public class DataIO {
 		}
 	}
 
-	public void parseXml(String filePath) {
-		try {
-			ArrayList<String> values = new ArrayList<String>();
-			
-			File fXmlFile = new File(filePath);
-			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-			Document doc = dBuilder.parse(fXmlFile);
-			doc.getDocumentElement().normalize();
-					
-			NodeList nList = doc.getElementsByTagName("Event");
+	public NodeList getNodeListFromXml() {
+		NodeList nList = null;
 
-			for (int item = 0; item < nList.getLength(); item++) {
-
-				Node nNode = nList.item(item);
-				System.out.println("\nCurrent Element :" + nNode.getParentNode().getNodeName());
-				
-				if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-					
-					Element eElement = (Element) nNode;
-					
-					values.add(eElement.getNodeName() + " id: " + eElement.getAttribute("id"));
-					
-					values.add("title: " + eElement.getElementsByTagName("title").item(0).getTextContent());
-					values.add("description: " + eElement.getElementsByTagName("description").item(0).getTextContent());
-					values.add("location: " + eElement.getElementsByTagName("location").item(0).getTextContent());
-					values.add("startDate: " + eElement.getElementsByTagName("startDate").item(0).getTextContent());
-					values.add("startTime: " + eElement.getElementsByTagName("startTime").item(0).getTextContent());
-					values.add("endDate: " + eElement.getElementsByTagName("endDate").item(0).getTextContent());
-					values.add("endTime: " + eElement.getElementsByTagName("endTime").item(0).getTextContent());
-					values.add("timerDateTime: " + eElement.getElementsByTagName("timerDateTime").item(0).getTextContent());
-				}
-			}
+		try {						
+			if (dataFile != null) {
+				DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+				DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+				Document doc = dBuilder.parse(dataFile);
+				doc.getDocumentElement().normalize();
+				nList = doc.getElementsByTagName("Event");
+			} else return null;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		return nList;
 	}
-	
-	public ArrayList<String> readXml(String filePath) throws IOException {		
-		ArrayList<String> readFileContent = new ArrayList<String>();		
+
+	public ArrayList<String> readXml() throws IOException {
+
+		ArrayList<String> readFileContent = new ArrayList<String>();
 		try {
-			readFileContent = (ArrayList<String>) Files.readAllLines(Paths.get(filePath));						
+			if (dataFile.exists()) {
+				String path = dataFile.getPath();
+				if (path != null) {
+					readFileContent = (ArrayList<String>) Files.readAllLines(Paths.get(path));
+				}
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
-		}		
+		}
 		return readFileContent;
 	}
 
-	public void appendXml(Event event, String filename) throws SAXException, IOException {
+	public void appendXml(Event event) throws SAXException, IOException {
+
 		try {
 			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-			Document doc = docBuilder.parse(filename);
-	        Element rootElement = doc.getDocumentElement();
-	        
-	        Element eventHeader = doc.createElement("Event");
+			Document doc = docBuilder.parse(dataFile);
+			Element rootElement = doc.getDocumentElement();
+
+			Element eventHeader = doc.createElement("Event");
 			rootElement.appendChild(eventHeader);
 
 			Attr attr = doc.createAttribute("id");
@@ -182,35 +174,33 @@ public class DataIO {
 			Element startDate = doc.createElement("startDate");
 			startDate.appendChild(doc.createTextNode(event.getStartDate()));
 			eventHeader.appendChild(startDate);
-			
-			if(event.getStartTime() != null) {
-				Element startTime = doc.createElement("startTime");
-				startTime.appendChild(doc.createTextNode(event.getStartTime()));
-				eventHeader.appendChild(startTime);
-			}
+
+			Element startTime = doc.createElement("startTime");
+			startTime.appendChild(doc.createTextNode(event.getStartTime()));
+			eventHeader.appendChild(startTime);
 
 			Element endDate = doc.createElement("endDate");
 			endDate.appendChild(doc.createTextNode(event.getEndDate()));
-			eventHeader.appendChild(endDate);		
-			
-			if(event.getEndTime() != null) {
-				Element endTime = doc.createElement("endTime");
-				endTime.appendChild(doc.createTextNode(event.getEndTime()));
-				eventHeader.appendChild(endTime);
+			eventHeader.appendChild(endDate);
+
+			Element endTime = doc.createElement("endTime");
+			endTime.appendChild(doc.createTextNode(event.getEndTime()));
+			eventHeader.appendChild(endTime);
+
+			if (event.getAlarmDateTime() != null) {
+				Element timerDateTime = doc.createElement("timerDateTime");
+				timerDateTime.appendChild(doc.createTextNode(event.getAlarmDateTime().toString()));
+				eventHeader.appendChild(timerDateTime);
 			}
-			
-			Element timerDateTime = doc.createElement("timerDateTime");
-			timerDateTime.appendChild(doc.createTextNode(event.getAlarmDateTime().toString()));
-			eventHeader.appendChild(timerDateTime);
-			
+
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			Transformer transformer = transformerFactory.newTransformer();
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-			
+
 			DOMSource source = new DOMSource(doc);
-			StreamResult result = new StreamResult(filename);
+			StreamResult result = new StreamResult(dataFile);
 			transformer.transform(source, result);
-			
+
 			System.out.println("Text appended and saved!");
 
 		} catch (ParserConfigurationException pce) {

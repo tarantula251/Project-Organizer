@@ -28,6 +28,9 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import com.toedter.calendar.JDateChooser;
@@ -38,6 +41,7 @@ import model.DataIO;
 import model.Event;
 import model.exception.EventEmptyFieldException;
 import model.exception.EventInvalidDateException;
+import model.exception.EventInvalidTimeException;
 import model.exception.TimerDateTimeException;
 import view.EventWindow;
 import view.MainWindow;
@@ -51,8 +55,11 @@ public class EventManager {
 	private volatile Boolean alarmDismissed = false;
 
 	public EventManager(MainWindow mainWindow)
-			throws LineUnavailableException, IOException, UnsupportedAudioFileException {
+			throws LineUnavailableException, IOException, UnsupportedAudioFileException, ParseException, EventEmptyFieldException, EventInvalidDateException, EventInvalidTimeException, TimerDateTimeException {
 		this.mainWindow = mainWindow;
+		
+		importEventsFromXml();
+		
 		clip = AudioSystem.getClip();
 		AudioInputStream inputStream = AudioSystem.getAudioInputStream(new File("resources/alarm.wav"));
 		clip.open(inputStream);
@@ -99,18 +106,18 @@ public class EventManager {
 		return "EventManager [eventCollection=" + eventCollection.toString() + "]";
 	}
 
-	private void sendDataToXml(Event event, String filename) throws SAXException, IOException {
-		
-		if (event.getIndex() == 1) {
-			dataIo.writeToXml(event, filename);
+	private void sendDataToXml(Event event) throws SAXException, IOException, ParseException, EventEmptyFieldException, EventInvalidDateException, EventInvalidTimeException, TimerDateTimeException {
+
+		if (eventCollection.size() == 0) {
+			dataIo.writeToXml(event, "databank/data.xml");					
 		} else {
-			ArrayList<String> content = dataIo.readXml(filename);
-			dataIo.appendXml(event, filename);
+			ArrayList<String> content = dataIo.readXml();
+			dataIo.appendXml(event);
 		}
 	}
 
 	private void getDataFromXml(String filename) {
-		dataIo.parseXml(filename);
+		//dataIo.parseXml(filename);
 	}
 
 	public void addEvent(String titleValue, String descriptionValue, String locationValue, String startDateValue,
@@ -118,12 +125,15 @@ public class EventManager {
 			throws EventManagerException, EventInvalidDateException, EventEmptyFieldException {
 		try {
 			Event event = new Event(titleValue, descriptionValue, locationValue, startDateValue, endDateValue,
-					startTimeValue, endTimeValue, alarmDateTimeValue);
+					startTimeValue, endTimeValue, alarmDateTimeValue);					
 			eventCollection.add(event);
+					
 			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
 			String titleDate = simpleDateFormat.format(new Date());
-			String filename = "databank/data-" + titleDate + ".xml";
-			sendDataToXml(event, filename);
+			String filename = "databank/data.xml";
+						
+			sendDataToXml(event);
+			
 		} catch (EventEmptyFieldException eventEmptyFieldException) {
 			throw new controller.exception.EventManagerException("Invalid values in fields, please correct");
 		} catch (Exception e) {
@@ -228,7 +238,45 @@ public class EventManager {
                 	} 
 				);									
 			}					
-		}	
-		
+		}			
+	}
+	
+	public void importEventsFromXml() throws ParseException, EventEmptyFieldException, EventInvalidDateException, EventInvalidTimeException, TimerDateTimeException {
+		NodeList nList = dataIo.getNodeListFromXml();
+	    if (nList != null) {
+			for (int item = 0; item < nList.getLength(); item++) {
+				
+				Node nNode = nList.item(item);		
+				
+				if (nNode.getNodeType() == Node.ELEMENT_NODE) {				
+					Element eElement = (Element) nNode;
+					String title, description, location, startDate, startTime, endDate, endTime, timerDateTime = "";
+					Integer index = null;
+					title = eElement.getElementsByTagName("title").item(0).getTextContent();
+					description = eElement.getElementsByTagName("description").item(0).getTextContent();
+					location = eElement.getElementsByTagName("location").item(0).getTextContent();
+					startDate = eElement.getElementsByTagName("startDate").item(0).getTextContent();
+					startTime = eElement.getElementsByTagName("startTime").item(0).getTextContent();
+					endDate = eElement.getElementsByTagName("endDate").item(0).getTextContent();
+					endTime = eElement.getElementsByTagName("endTime").item(0).getTextContent();
+					NodeList timerNl = eElement.getElementsByTagName("timerDateTime");
+					if (timerNl.getLength() > 0)
+						timerDateTime = eElement.getElementsByTagName("timerDateTime").item(0).getTextContent();	
+					SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+					Date timerDate = null;
+					if (!timerDateTime.isEmpty())					
+						timerDate = simpleDateFormat.parse(timerDateTime);												
+					Event fetchedEvent = new Event(title, description, location, startDate, endDate, startTime, endTime, timerDate);				
+					index = Integer.parseInt(eElement.getAttribute("id"));
+					fetchedEvent.setIndex(index);
+					
+					System.out.println("fetchedEvent " + fetchedEvent);
+	
+					eventCollection.add(fetchedEvent);			
+				}
+			}				
+			for (int i = 0; i < eventCollection.size(); i++)
+			System.out.println(eventCollection.get(i));
+	    } else return;		
 	}
 }

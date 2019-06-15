@@ -51,6 +51,11 @@ import javax.swing.JTable;
 import javax.swing.border.BevelBorder;
 
 import model.Event;
+import model.exception.EventEmptyFieldException;
+import model.exception.EventInvalidDateException;
+import model.exception.EventInvalidTimeException;
+import model.exception.TimerDateTimeException;
+
 import javax.swing.table.DefaultTableModel;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -81,7 +86,7 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 	private JCalendar calendarWidget;
 	private JPanel panel;
 
-	public MainWindow() throws LineUnavailableException, IOException, UnsupportedAudioFileException, ParseException {
+	public MainWindow() throws LineUnavailableException, IOException, UnsupportedAudioFileException, ParseException, EventEmptyFieldException, EventInvalidDateException, EventInvalidTimeException, TimerDateTimeException {		
 		eventManager = new EventManager(this);
 		initialize();
 	}
