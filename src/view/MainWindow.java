@@ -2,6 +2,7 @@ package view;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -55,6 +56,8 @@ import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import java.awt.GridLayout;
 import com.toedter.calendar.JCalendar;
+import java.awt.Component;
+import javax.swing.Box;
 
 public class MainWindow implements MenuListener, ActionListener, KeyListener {
 
@@ -72,10 +75,11 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 	private JButton createEventBtn;
 	private JLabel label;
 	private JTextField textField;
-	private JLabel label_1;
+	private JLabel labelEvents;
 	private JScrollPane scrollPane;
 	private JTable table;
 	private JCalendar calendarWidget;
+	private JPanel panel;
 
 	public MainWindow() throws LineUnavailableException, IOException, UnsupportedAudioFileException, ParseException {
 		eventManager = new EventManager(this);
@@ -83,6 +87,7 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 	}
 
 	private void initialize() throws ParseException {
+		window.setResizable(false);
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		addCalendar();
 		addMenuBar();
@@ -127,19 +132,36 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		createEventBtn.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		createEventBtn.addActionListener(this);
 
+		panel = new JPanel();
+		window.getContentPane().add(panel);
+		GridBagLayout gbl_panel = new GridBagLayout();
+		gbl_panel.columnWidths = new int[] { 363 };
+		gbl_panel.rowHeights = new int[] { 21, 233 };
+		gbl_panel.columnWeights = new double[] { 1.0 };
+		gbl_panel.rowWeights = new double[] { 0.0, 1.0 };
+		panel.setLayout(gbl_panel);
+
+		labelEvents = new JLabel("View your events: ");
+		labelEvents.setHorizontalAlignment(SwingConstants.LEFT);
+		labelEvents.setLabelFor(panel);
+		labelEvents.setFont(new Font("Tahoma", Font.PLAIN, 12));
+		GridBagConstraints gbc_labelEvents = new GridBagConstraints();
+		gbc_labelEvents.fill = GridBagConstraints.BOTH;
+		gbc_labelEvents.insets = new Insets(0, 0, 5, 0);
+		gbc_labelEvents.gridx = 0;
+		gbc_labelEvents.gridy = 0;
+		panel.add(labelEvents, gbc_labelEvents);
+
 		scrollPane = new JScrollPane();
-		scrollPane.setBounds(406, 85, 286, 427);
 
 		table = new JTable();
-		table.setModel(new DefaultTableModel(new Object[][] { { "101", "Amit", "670000" } },
-				new String[] { "Title", "Start date", "Start time" }));
+		table.setModel(new DefaultTableModel(new Object[][] {}, new String[] { "Title", "Start date", "Start time" }));
 		scrollPane.setViewportView(table);
-		window.getContentPane().add(scrollPane);
-
-		label_1 = new JLabel("View your events: ");
-		scrollPane.setColumnHeaderView(label_1);
-		label_1.setBounds(307, 291, 99, 15);
-		label_1.setFont(new Font("Tahoma", Font.PLAIN, 12));
+		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
+		gbc_scrollPane.fill = GridBagConstraints.BOTH;
+		gbc_scrollPane.gridx = 0;
+		gbc_scrollPane.gridy = 1;
+		panel.add(scrollPane, gbc_scrollPane);
 	}
 
 	private void showSelectedDate(JCalendar calendar) {
