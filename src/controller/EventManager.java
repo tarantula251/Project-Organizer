@@ -81,10 +81,7 @@ public class EventManager {
 						for (Event event : eventCollection) {
 							if (event.getAlarmDateTime() != null) {
 								Date date = new Date();
-								
-								System.out.println("curr date " + date.toString());
-								System.out.println("eve date " + event.getAlarmDateTime().toString());
-								
+
 								int comparedTime = date.compareTo(event.getAlarmDateTime());
 								if (comparedTime >= 0) {
 									clip.start();
