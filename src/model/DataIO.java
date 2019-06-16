@@ -24,7 +24,10 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public class DataIO {
-
+	
+	/**
+	 * 	Pole dataFile przechowujące instancję pliku z bazą danych.
+	 */
 	private File dataFile;
 
 	public File getDataFile() {
@@ -35,9 +38,17 @@ public class DataIO {
 		this.dataFile = dataFile;
 	}
 
+	/**
+	 * 	Konstruktor tworzy obiekt klasy DataIO, odpowiedzialnej za odczyt oraz zapis danych do bazy danych.
+	 */
 	public DataIO() {
 	}
 
+	/**
+	 * Metoda tworzy nowy plik będący bazą danych oraz zapisuje do niego dane nowo utworzonego Eventu.                       
+	 * @param event - obiekt Event, którego dane zostaną zapisane do pliku
+	 * @param filename - nazwa pliku, do którego nastąpi zapis     
+	 */
 	public void writeToXml(Event event, String filename) {
 
 		try {
@@ -109,6 +120,10 @@ public class DataIO {
 		}
 	}
 
+	/**
+	 * Metoda pobiera listę węzłów z pliku XML, w którym przechowywane są dane o Eventach                  
+	 * @return NodeList - obiekt przechowujący listę węzłów zawierających dane o Eventach
+	 */
 	public NodeList getNodeListFromXml() {
 		NodeList nList = null;
 
@@ -135,6 +150,11 @@ public class DataIO {
 		return nList;
 	}
 
+	/**
+	 * Metoda odczytuje zawartość pliku XML z danymi o Eventach i zapisuje je do listy.                
+	 * @return ArrayList - obiekt przechowujący odczytaną zawartość pliku XML
+	 * @throws IOException - wyjątek zostaje rzucony, gdy nastąpi problem z otwarciem pliku
+	 */
 	public ArrayList<String> readXml() throws IOException {
 
 		ArrayList<String> readFileContent = new ArrayList<String>();
@@ -151,6 +171,12 @@ public class DataIO {
 		return readFileContent;
 	}
 
+	/**
+	 * Metoda dopisuje do istniejącego pliku XML dane o nowo utworzonym Evencie.
+	 * @param event - obiekt Event, którego dane zostaną zapisane do pliku
+	 * @throws SAXException - wyjątek zostaje rzucony, gdy nastąpi błąd parsowania pliku XML          
+	 * @throws IOException - wyjątek zostaje rzucony, gdy nastąpi problem z otwarciem pliku
+	 */
 	public void appendXml(Event event) throws SAXException, IOException {
 
 		try {
