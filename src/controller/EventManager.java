@@ -133,7 +133,7 @@ public class EventManager {
 		{
 			for(Event existingEvent : eventCollection)
 			{
-				if(existingEvent != event) dataIo.appendXml(event);
+				if(existingEvent != event) dataIo.appendXml(existingEvent);
 			}
 		}
 	}
