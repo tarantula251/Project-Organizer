@@ -13,17 +13,50 @@ import model.exception.EventInvalidTimeException;
 import model.exception.TimerDateTimeException;
 
 public class Event implements Comparable<Event> {
+	/**
+	 * 	Pole counter autoinkrementujące wartość pola index
+	 */
 	private static int counter = 0; 
+	/**
+	 * 	Pole title przechowujące tytuł Eventu
+	 */
 	private String title;
+	/**
+	 * 	Pole description przechowujące opis Eventu
+	 */
 	private String description;
+	/**
+	 * 	Pole location przechowujące lokalizację Eventu
+	 */
 	private String location;
+	/**
+	 * 	Pole startDate przechowujące datę początku Eventu
+	 */
 	private String startDate;
+	/**
+	 * 	Pole endDate przechowujące datę końca Eventu
+	 */
 	private String endDate;
+	/**
+	 * 	Pole startTime przechowujące czas początku Eventu
+	 */
 	private String startTime;
+	/**
+	 * 	Pole endTime przechowujące czas końca Eventu
+	 */
 	private String endTime;
+	/**
+	 * 	Pole index przechowujące ID Eventu
+	 */
 	private Integer index;
+	/**
+	 * 	Pole alarmDateTime przechowujące datę oraz czas, w którym uruchomi się alarm dla Eventu
+	 */
 	private Date alarmDateTime;
 	
+	/**
+	 * 	Konstruktor tworzy obiekt klasy Event, przechowujący wszystkie informacje o nim
+	 */
 	public Event(String title, String description, String location, String startDate, String endDate, String startTime, String endTime, Date alarmDateTimeValue) throws EventEmptyFieldException, EventInvalidDateException, EventInvalidTimeException, ParseException, TimerDateTimeException {
 		setTitle(title);
 		setDescription(description);
@@ -93,14 +126,6 @@ public class Event implements Comparable<Event> {
 
 	public Integer getIndex() {
 		return index;
-	}
-
-	public Event() {}
-
-	@Override
-	public String toString() {
-		return "Event [title=" + title + ", description=" + description + ", location=" + location + ", startDate="
-				+ startDate + ", endDate=" + endDate + ", index=" + index + "]";
 	}
 
 	public String getTitle() {

@@ -73,6 +73,10 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 	private JSplitPane splitPaneFilter;
 	private JTextField txtFieldFilter;
 
+	/**
+	 * 	Konstruktor tworzy obiekt klasy MainWindow, który jest głównym oknem aplikacji.
+	 * @throws Exception - wyjątek zostaje rzucony, gdy którykolwiek z użytych komponentów rzuci wyjątek
+	 */
 	public MainWindow() throws Exception {
 		try {
 			eventManager = new EventManager(this);
@@ -113,7 +117,9 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 			throw new Exception();
 		}
 	}
-
+	/**
+	 * 	Metoda inicjująca okno i określająca jego ogólny wygląd
+	 */
 	public void initialize(){
 		window.setResizable(false);
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -125,6 +131,9 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		refreshEventsTable();
 	}
 
+	/**
+	 * 	Metoda odświeża wygląd tabeli z Eventami, gdy kolekcja Eventów jest aktualizowana
+	 */
 	public void refreshEventsTable() {
 		var model = (DefaultTableModel) table.getModel();
 		model.setRowCount(0);
@@ -149,6 +158,9 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		this.eventDate = eventDate;
 	}
 
+	/**
+	 * 	Metoda dodaje do okna głównego komponent JCalendar
+	 */
 	@SuppressWarnings("serial")
 	private void addCalendar() {
 		window.getContentPane().setLayout(new BoxLayout(window.getContentPane(), BoxLayout.X_AXIS));
@@ -271,6 +283,9 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		});
 	}
 
+	/**
+	 * 	Metoda dodaje menu do paska aplikacji
+	 */
 	private void addMenuBar() {
 		this.addKeyListener(this);
 
@@ -338,6 +353,9 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 
 	}
 
+	/**
+	 * 	Metoda odpowiedzialna za wywołanie akcji
+	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
 

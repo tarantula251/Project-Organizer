@@ -1,8 +1,14 @@
 package view;
 
 public class AboutProgramWindow {
+	/**
+	 * 	Pole aboutProgramMessage zawierające treść wiadomości w oknie
+	 */
 	private String aboutProgramMessage = "";
 	
+	/**
+	 * 	Metoda inicjująca okno About Program i wyznaczająca jego zawartość
+	 */
 	public AboutProgramWindow() {
 		String pageTitle = "<html><h1 align='center' style='color:#666699;font-size:12px;font-family:verdana;'>Organizer Application</h1>";
 		String pageHeader = "<h2 align='center' style='font-size:8px;font-family:verdana;font-weight:bold;'>Created by Franciszek Demski & Justyna Gasior</h2>";

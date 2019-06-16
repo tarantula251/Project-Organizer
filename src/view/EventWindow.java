@@ -14,6 +14,8 @@ import controller.EventManager;
 import controller.exception.EventManagerException;
 import model.exception.EventEmptyFieldException;
 import model.exception.EventInvalidDateException;
+import model.exception.EventInvalidTimeException;
+import model.exception.TimerDateTimeException;
 
 import java.awt.Font;
 import java.awt.GridBagLayout;
@@ -22,11 +24,14 @@ import java.awt.Insets;
 import javax.swing.JTextArea;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 
 import java.awt.Color;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -104,11 +109,19 @@ public class EventWindow {
 		this.startDateField = startDateField;
 	}
 
+	/**
+	 * 	Konstruktor tworzy obiekt klasy EventWindow, który pełni fukcję widoku kreatora Eventów
+	 * @param mainWindow - obiekt łączący EventWindow z MainWindow, zapewniający dostęp do warstwy logiki
+	 */
 	public EventWindow(MainWindow mainWindow) {
 		this.eventManager = mainWindow.getEventManager();
 		initialize(mainWindow.getWindow());
 	}
 
+	/**
+	 * 	Metoda inicjująca okno i określająca jego ogólny wygląd
+	 * @param parent - obiekt typu JFrame służący do stworzenia okna dialogowego
+	 */
 	private void initialize(JFrame parent) {
 		frmEventCreator = new JDialog(parent, "Event creator", true);
 		frmEventCreator.setModal(true);
