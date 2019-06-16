@@ -359,16 +359,19 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		}
 
 		if (e.getSource().equals(deleteEventBtn)) {
-			int eventId = (Integer) table.getModel().getValueAt(table.getSelectedRow(), 0);
-			if (JOptionPane.showConfirmDialog(null, "Do you really want to remove selected event?", "Delete event",
-					JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-				try {
-					eventManager.removeEvent(eventId);
-					refreshEventsTable();
-				} catch (EventManagerException | SAXException | IOException | ParseException | EventEmptyFieldException
-						| EventInvalidDateException | EventInvalidTimeException | TimerDateTimeException e1) {
-					JOptionPane.showMessageDialog(null, e1.getMessage(), "Delete event", JOptionPane.ERROR_MESSAGE);
-					e1.printStackTrace();
+			if(table.getSelectedRowCount() > 0)
+			{
+				int eventId = (Integer) table.getModel().getValueAt(table.getSelectedRow(), 0);
+				if (JOptionPane.showConfirmDialog(null, "Do you really want to remove selected event?", "Delete event",
+						JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+					try {
+						eventManager.removeEvent(eventId);
+						refreshEventsTable();
+					} catch (EventManagerException | SAXException | IOException | ParseException | EventEmptyFieldException
+							| EventInvalidDateException | EventInvalidTimeException | TimerDateTimeException e1) {
+						JOptionPane.showMessageDialog(null, e1.getMessage(), "Delete event", JOptionPane.ERROR_MESSAGE);
+						e1.printStackTrace();
+					}
 				}
 			}
 		}
