@@ -57,15 +57,18 @@ public class EventManager {
 	ArrayList<Event> eventCollection = new ArrayList<Event>();
 	MainWindow mainWindow;
 	DataIO dataIo = new DataIO();
+	String directory = "databank";
+	String eventsFilename = "data.xml";
 	Clip clip;
 	private volatile Boolean alarmDismissed = false;
 
 	public EventManager(MainWindow mainWindow)
-			throws LineUnavailableException, IOException, UnsupportedAudioFileException, ParseException, EventEmptyFieldException, EventInvalidDateException, EventInvalidTimeException, TimerDateTimeException {
+			throws LineUnavailableException, IOException, UnsupportedAudioFileException, ParseException,
+			EventEmptyFieldException, EventInvalidDateException, EventInvalidTimeException, TimerDateTimeException {
 		this.mainWindow = mainWindow;
-		
+
 		importEventsFromXml();
-		
+
 		clip = AudioSystem.getClip();
 		AudioInputStream inputStream = AudioSystem.getAudioInputStream(new File("resources/alarm.wav"));
 		clip.open(inputStream);
@@ -91,14 +94,12 @@ public class EventManager {
 													+ event.getEndTime() + "\n");
 									clip.stop();
 									event.setAlarmDateTime(null);
-									String directory = "databank";
-									String filename = "data.xml";
 									createDirectory(directory);
-									sendDataToXml(event, directory + "/" + filename);
+									sendDataToXml(event, directory + "/" + eventsFilename);
 								}
 							}
 						}
-						
+
 						Thread.sleep(1000);
 						
 					} catch (InterruptedException | ParseException | TimerDateTimeException | SAXException | IOException e) {
@@ -123,48 +124,64 @@ public class EventManager {
 	public ArrayList<Event> getEventCollection() {
 		return eventCollection;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "EventManager [eventCollection=" + eventCollection.toString() + "]";
 	}
 
-	private void sendDataToXml(Event event, String filename) throws SAXException, IOException, ParseException, EventEmptyFieldException, EventInvalidDateException, EventInvalidTimeException, TimerDateTimeException {		
+	private void sendDataToXml(Event event, String filename) throws SAXException, IOException, ParseException,
+			EventEmptyFieldException, EventInvalidDateException, EventInvalidTimeException, TimerDateTimeException {
 		dataIo.writeToXml(event, filename);
-		if(eventCollection.size() > 1)
-		{
-			for(Event existingEvent : eventCollection)
-			{
-				if(existingEvent != event) dataIo.appendXml(existingEvent);
+		if (eventCollection.size() > 1) {
+			for (Event existingEvent : eventCollection) {
+				if (existingEvent != event)
+					dataIo.appendXml(existingEvent);
 			}
 		}
 	}
-	
-	void createDirectory(String directory) throws IOException
-	{
+
+	void createDirectory(String directory) throws IOException {
 		var path = Paths.get(directory);
-		if(!Files.exists(path)) Files.createDirectory(path);
+		if (!Files.exists(path))
+			Files.createDirectory(path);
 	}
-	
+
 	public void addEvent(String titleValue, String descriptionValue, String locationValue, String startDateValue,
 			String endDateValue, String startTimeValue, String endTimeValue, Date alarmDateTimeValue)
 			throws EventManagerException, EventInvalidDateException, EventEmptyFieldException {
 		try {
 			Event event = new Event(titleValue, descriptionValue, locationValue, startDateValue, endDateValue,
-					startTimeValue, endTimeValue, alarmDateTimeValue);					
+					startTimeValue, endTimeValue, alarmDateTimeValue);
 			eventCollection.add(event);
-					
-			String directory = "databank";
-			String filename = "data.xml";
+
 			createDirectory(directory);
-									
-			sendDataToXml(event, directory + "/" + filename);
-			
+
+			sendDataToXml(event, directory + "/" + eventsFilename);
+
 		} catch (EventEmptyFieldException eventEmptyFieldException) {
 			throw new controller.exception.EventManagerException("Invalid values in fields, please correct");
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
+	}
+
+	public void removeEvent(int eventId) throws EventManagerException, SAXException, IOException, ParseException,
+			EventEmptyFieldException, EventInvalidDateException, EventInvalidTimeException, TimerDateTimeException {
+		for (Event event : eventCollection) {
+			if (event.getIndex() == eventId) {
+				eventCollection.remove(event);
+				if (!eventCollection.isEmpty())
+					sendDataToXml(eventCollection.get(0), directory + "/" + eventsFilename);
+				else {
+					Files.deleteIfExists(Paths.get(directory + "/" + eventsFilename));
+					Files.deleteIfExists(Paths.get(directory));
+				}
+
+				return;
+			}
+		}
+		throw new controller.exception.EventManagerException("Provided event ID doesn't exist");
 	}
 
 	public String fetchSelectedDate() {
@@ -174,7 +191,7 @@ public class EventManager {
 	public void fillStartDateField(EventWindow eventWindow) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
-				try {					
+				try {
 					Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse(fetchSelectedDate());
 
 					JDateChooser startDayField = eventWindow.getStartDateField();
@@ -215,9 +232,9 @@ public class EventManager {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		GregorianCalendar calendarStop = new GregorianCalendar(year, month, day, startHour - timerHour,
 				startMinute - timerMinute, 0);
-		String resultString = sdf.format(calendarStop.getTime());		
+		String resultString = sdf.format(calendarStop.getTime());
 		Date goOff = sdf.parse(resultString);
-		
+
 		return goOff;
 	}
 
@@ -250,29 +267,27 @@ public class EventManager {
 	public void addRowToTable(JTable table) throws ParseException {
 		DefaultTableModel model = (DefaultTableModel) table.getModel();
 		Date currentDate = new Date();
-		
+
 		for (Event event : getEventCollection()) {
 			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			Date eventDate = simpleDateFormat.parse(event.getStartDate());
-			
+
 			int comparedTime = eventDate.compareTo(currentDate);
 			if (comparedTime > 0) {
-				model.addRow(new Object[] {
-						event.getTitle(), event.getStartDate(), event.getStartTime()                
-                	} 
-				);									
-			}					
-		}			
+				model.addRow(new Object[] { event.getTitle(), event.getStartDate(), event.getStartTime() });
+			}
+		}
 	}
-	
-	public void importEventsFromXml() throws ParseException, EventEmptyFieldException, EventInvalidDateException, EventInvalidTimeException, TimerDateTimeException {
+
+	public void importEventsFromXml() throws ParseException, EventEmptyFieldException, EventInvalidDateException,
+			EventInvalidTimeException, TimerDateTimeException {
 		NodeList nList = dataIo.getNodeListFromXml();
-	    if (nList != null) {
+		if (nList != null) {
 			for (int item = 0; item < nList.getLength(); item++) {
-				
-				Node nNode = nList.item(item);		
-				
-				if (nNode.getNodeType() == Node.ELEMENT_NODE) {				
+
+				Node nNode = nList.item(item);
+
+				if (nNode.getNodeType() == Node.ELEMENT_NODE) {
 					Element eElement = (Element) nNode;
 					String title, description, location, startDate, startTime, endDate, endTime, timerDateTime = "";
 					Integer index = null;
@@ -285,24 +300,26 @@ public class EventManager {
 					endTime = eElement.getElementsByTagName("endTime").item(0).getTextContent();
 					NodeList timerNl = eElement.getElementsByTagName("timerDateTime");
 					if (timerNl.getLength() > 0)
-						timerDateTime = eElement.getElementsByTagName("timerDateTime").item(0).getTextContent();	
+						timerDateTime = eElement.getElementsByTagName("timerDateTime").item(0).getTextContent();
 					SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 					Date timerDate = null;
 					if (!timerDateTime.isEmpty()) {
-						timerDate = simpleDateFormat.parse(timerDateTime);												
+						timerDate = simpleDateFormat.parse(timerDateTime);
 					}
-					Event fetchedEvent = new Event(title, description, location, startDate, endDate, startTime, endTime, timerDate);				
+					Event fetchedEvent = new Event(title, description, location, startDate, endDate, startTime, endTime,
+							timerDate);
 					index = Integer.parseInt(eElement.getAttribute("id"));
 					fetchedEvent.setIndex(index);
-					
+
 					System.out.println("fetchedEvent " + fetchedEvent);
-	
-					eventCollection.add(fetchedEvent);			
+
+					eventCollection.add(fetchedEvent);
 				}
-			}				
+			}
 			for (int i = 0; i < eventCollection.size(); i++)
-			System.out.println(eventCollection.get(i));
-	    } else return;		
+				System.out.println(eventCollection.get(i));
+		} else
+			return;
 	}
 	
 	public void filterEventsTable(JTable table, String field) {

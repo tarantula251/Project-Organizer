@@ -39,7 +39,11 @@ import javax.swing.event.MenuListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 
+import org.xml.sax.SAXException;
+
 import controller.EventManager;
+import controller.exception.EventManagerException;
+
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
@@ -427,7 +431,17 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		}
 
 		if (e.getSource().equals(deleteEventBtn)) {
-			int eventIndex = table.getSelectedRow();
+			int eventId = (Integer)table.getModel().getValueAt(table.getSelectedRow(), 0);
+			if(JOptionPane.showConfirmDialog(null, "Do you really want to remove selected event?", "Delete event", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION)
+			{
+				try {
+					eventManager.removeEvent(eventId);
+					refreshEventsTable();
+				} catch (EventManagerException | SAXException | IOException | ParseException | EventEmptyFieldException | EventInvalidDateException | EventInvalidTimeException | TimerDateTimeException e1) {
+					JOptionPane.showMessageDialog(null, e1.getMessage(), "Delete event", JOptionPane.ERROR_MESSAGE);
+						e1.printStackTrace();
+					}
+			}
 		}
 
 	}
