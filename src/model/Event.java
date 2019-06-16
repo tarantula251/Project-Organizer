@@ -12,7 +12,7 @@ import model.exception.EventInvalidDateException;
 import model.exception.EventInvalidTimeException;
 import model.exception.TimerDateTimeException;
 
-public class Event {
+public class Event implements Comparable<Event> {
 	private static int counter = 0; 
 	private String title;
 	private String description;
@@ -158,5 +158,10 @@ public class Event {
 			throw new model.exception.EventEmptyFieldException("End date cannot be after end date");
 		else
 			this.endDate = endDate;
+	}
+
+	@Override
+	public int compareTo(Event o) {
+		return new String(startDate + " " + startTime).compareTo(o.startDate + " " + o.startTime);
 	}	
 }

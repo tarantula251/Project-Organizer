@@ -369,7 +369,6 @@ public class EventWindow {
 					frmEventCreator.dispose();
 				} catch (EventManagerException ex) {
 					showErrorPane(ex.getMessage());
-					System.out.println(ex.getMessage());
 				} catch (EventInvalidDateException e1) {
 					showErrorPane(e1.getMessage());
 				} catch (EventEmptyFieldException e1) {

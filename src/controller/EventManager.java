@@ -136,6 +136,7 @@ public class EventManager {
 			Event event = new Event(titleValue, descriptionValue, locationValue, startDateValue, endDateValue,
 					startTimeValue, endTimeValue, alarmDateTimeValue);
 			eventCollection.add(event);
+			eventCollection.sort(null);
 
 			createDirectory(directory);
 
@@ -144,7 +145,7 @@ public class EventManager {
 		} catch (EventEmptyFieldException eventEmptyFieldException) {
 			throw new controller.exception.EventManagerException("Invalid values in fields, please correct");
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			e.printStackTrace();
 		}
 	}
 
