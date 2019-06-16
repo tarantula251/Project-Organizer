@@ -111,6 +111,10 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 			JOptionPane.showMessageDialog(null, e.getMessage(), "EventInvalidTimeException", JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();
 			throw new Exception();
+		} catch (EventManagerException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage(), "EventManagerException", JOptionPane.ERROR_MESSAGE);
+			e.printStackTrace();
+			throw new Exception();
 		} catch (TimerDateTimeException e) {
 			JOptionPane.showMessageDialog(null, e.getMessage(), "TimerDateTimeException", JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();

@@ -5,11 +5,17 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+
+import java.sql.SQLException;
+import java.text.DateFormat;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
+
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
@@ -38,49 +44,53 @@ import view.MainWindow;
 
 public class EventManager {
 
+	HashMap<String, String> config = null;
 	/**
-	 * 	Pole eventCollection przechowujące kolekcję wszystkich Eventów w liście
+	 * 	Pole eventCollection przechowujÄ…ce kolekcjÄ™ wszystkich EventÃ³w w liÅ›cie
 	 */
 	private ArrayList<Event> eventCollection = new ArrayList<Event>();
 	/**
-	 * 	Pole mainWindow łączące wartstwę logiki z warstwą widoku
+	 * 	Pole mainWindow Å‚Ä…czÄ…ce wartstwÄ™ logiki z warstwÄ… widoku
 	 */
 	private MainWindow mainWindow;
 	/**
-	 * 	Pole dataIo łączące wartstwę logiki z warstwą danych
+	 * 	Pole dataIo Å‚Ä…czÄ…ce wartstwÄ™ logiki z warstwÄ… danych
 	 */
 	private DataIO dataIo = new DataIO();
 	/**
-	 * 	Pole directory określające folder zawierający bazę danych
+	 * 	Pole directory okreÅ›lajÄ…ce folder zawierajÄ…cy bazÄ™ danych
 	 */
 	private String directory = "databank";
 	/**
-	 * 	Pole eventsFilename określające nazwę pliku XML z danymi
+	 * 	Pole eventsFilename okreÅ›lajÄ…ce nazwÄ™ pliku XML z danymi
 	 */
 	private String eventsFilename = "data.xml";
 	/**
-	 * 	Pole clip niezbędne do uruchomienia pliku dźwiękowego dla alarmu
+	 * 	Pole clip niezbÄ™dne do uruchomienia pliku dÅºwiÄ™kowego dla alarmu
 	 */
 	private Clip clip;
 
 	/**
-	 * 	Konstruktor tworzy obiekt klasy EventManager, który odpowiedzialny jest za zarządzanie Eventami oraz  przekazywanie danych o nich do innych warstw aplikacji
-	 * @param mainWindow - obiekt reprezentujący główne okno aplikacji
-	 * @throws LineUnavailableException - wyjątek zostaje rzucony, gdy nastąpi błąd związany z uruchomieniem pliku dźwiękowego
-	 * @throws IOException - wyjątek zostaje rzucony, gdy nastąpi błąd związany z otwarciem pliku dźwiękowego
-	 * @throws UnsupportedAudioFileException - wyjątek zostaje rzucony, gdy nastąpi błąd związany z otwarciem pliku dźwiękowego
-	 * @throws ParseException - wyjątek zostaje rzucony, gdy nastąpi błąd związany z zaimportowaniem Eventów z bazy XML
-	 * @throws EventEmptyFieldException - wyjątek zostaje rzucony, gdy nastąpi błąd związany z utworzeniem Eventów z zaimportowanego pliku XML
-	 * @throws EventInvalidDateException - wyjątek zostaje rzucony, gdy nastąpi błąd związany z utworzeniem Eventów z zaimportowanego pliku XML
-	 * @throws EventInvalidTimeException - wyjątek zostaje rzucony, gdy nastąpi błąd związany z utworzeniem Eventów z zaimportowanego pliku XML
-	 * @throws TimerDateTimeException - wyjątek zostaje rzucony, gdy nastąpi błąd związany z utworzeniem Eventów z zaimportowanego pliku XML
+	 * 	Konstruktor tworzy obiekt klasy EventManager, ktÃ³ry odpowiedzialny jest za zarzÄ…dzanie Eventami oraz  przekazywanie danych o nich do innych warstw aplikacji
+	 * @param mainWindow - obiekt reprezentujÄ…cy gÅ‚Ã³wne okno aplikacji
+	 * @throws LineUnavailableException - wyjÄ…tek zostaje rzucony, gdy nastÄ…pi bÅ‚Ä…d zwiÄ…zany z uruchomieniem pliku dÅºwiÄ™kowego
+	 * @throws IOException - wyjÄ…tek zostaje rzucony, gdy nastÄ…pi bÅ‚Ä…d zwiÄ…zany z otwarciem pliku dÅºwiÄ™kowego
+	 * @throws UnsupportedAudioFileException - wyjÄ…tek zostaje rzucony, gdy nastÄ…pi bÅ‚Ä…d zwiÄ…zany z otwarciem pliku dÅºwiÄ™kowego
+	 * @throws ParseException - wyjÄ…tek zostaje rzucony, gdy nastÄ…pi bÅ‚Ä…d zwiÄ…zany z zaimportowaniem EventÃ³w z bazy XML
+	 * @throws EventEmptyFieldException - wyjÄ…tek zostaje rzucony, gdy nastÄ…pi bÅ‚Ä…d zwiÄ…zany z utworzeniem EventÃ³w z zaimportowanego pliku XML
+	 * @throws EventInvalidDateException - wyjÄ…tek zostaje rzucony, gdy nastÄ…pi bÅ‚Ä…d zwiÄ…zany z utworzeniem EventÃ³w z zaimportowanego pliku XML
+	 * @throws EventInvalidTimeException - wyjÄ…tek zostaje rzucony, gdy nastÄ…pi bÅ‚Ä…d zwiÄ…zany z utworzeniem EventÃ³w z zaimportowanego pliku XML
+	 * @throws TimerDateTimeException - wyjÄ…tek zostaje rzucony, gdy nastÄ…pi bÅ‚Ä…d zwiÄ…zany z utworzeniem EventÃ³w z zaimportowanego pliku XML
+	 * @throws EventManagerException - wyjątek zostje rzucony, gdy nastąpi błąd ogólny modułu zarządzającego (np. bład odczytu konfiguracji)
 	 */
 	public EventManager(MainWindow mainWindow)
 			throws LineUnavailableException, IOException, UnsupportedAudioFileException, ParseException,
-			EventEmptyFieldException, EventInvalidDateException, EventInvalidTimeException, TimerDateTimeException {
+			EventEmptyFieldException, EventInvalidDateException, EventInvalidTimeException, TimerDateTimeException, EventManagerException {
 		this.mainWindow = mainWindow;
 
-		importEventsFromXml();
+		loadConfig();
+		if(connectToDatabase()) importEventsFromDatabase();
+		else importEventsFromXml();
 
 		clip = AudioSystem.getClip();
 		AudioInputStream inputStream = AudioSystem.getAudioInputStream(new File("resources/alarm.wav"));
@@ -123,6 +133,36 @@ public class EventManager {
 		alarmCheckThread.start();
 	}
 
+	private void loadConfig() throws EventManagerException
+	{
+		try {
+			config = dataIo.loadConfig();
+		} catch (IOException e) {
+			throw new EventManagerException("Couldn't load config from file.\nPleae, check for config file in application directory.");
+		}
+		
+	}
+	
+	private boolean connectToDatabase()
+	{
+		String server = config.get("server");
+		String database = config.get("database");
+		String user = config.get("user");
+		String password = config.get("password");
+		if(server == null || database == null || user == null || password == null) return false;
+		
+		try {
+			dataIo.connectToDatabase(server, database, user, password);
+			return true;
+		} catch (SQLException e) {
+		    System.out.println("SQLException: " + e.getMessage());
+		    System.out.println("SQLState: " + e.getSQLState());
+		    System.out.println("VendorError: " + e.getErrorCode());
+			return false;
+		}
+		
+	}
+	
 	public ArrayList<Event> getEventCollection() {
 		return eventCollection;
 	}
@@ -156,7 +196,7 @@ public class EventManager {
 	}
 
 	/**
-	 * 	Metoda tworzy Event i dodaje go do kolekcji. Jako parametry przyjmuje dane niezbędne do stworzenia Eventu
+	 * 	Metoda tworzy Event i dodaje go do kolekcji. Jako parametry przyjmuje dane niezbÄ™dne do stworzenia Eventu
 	 * @param titleValue
 	 * @param descriptionValue
 	 * @param locationValue
@@ -210,8 +250,8 @@ public class EventManager {
 	}
 
 	/**
-	 * 	Metoda pobiera wartość wybranej daty z ekranu głównego i przekazuje ją do stworzonego okna kreatora Eventów
-	 * @param eventWindow - instancja głównego okna aplikacji
+	 * 	Metoda pobiera wartoÅ›Ä‡ wybranej daty z ekranu gÅ‚Ã³wnego i przekazuje jÄ… do stworzonego okna kreatora EventÃ³w
+	 * @param eventWindow - instancja gÅ‚Ã³wnego okna aplikacji
 	 */
 	public void fillStartDateField(EventWindow eventWindow) {
 		EventQueue.invokeLater(new Runnable() {
@@ -265,14 +305,19 @@ public class EventManager {
 
 		return DataIO.parseStringToDate(resultString);
 	}
+	
+	public void importEventsFromDatabase()
+	{
+		
+	}
 
 	/**
-	 * 	Metoda importuje istniejące Eventy z bazy XML przy uruchomieniu programu oraz tworzy na tej podstawie kolekcję Eventów
-	 * @throws ParseException - wyjątek zostaje rzucony, gdy wystąpi błąd formatów dat
-	 * @throws EventEmptyFieldException - wyjątek zostaje rzucony, gdy nastąpi błąd związany z pobraniem Eventu z bazy
-	 * @throws EventInvalidDateException - wyjątek zostaje rzucony, gdy nastąpi błąd związany z pobraniem Eventu z bazy
-	 * @throws EventInvalidTimeException - wyjątek zostaje rzucony, gdy nastąpi błąd związany z pobraniem Eventu z bazy
-	 * @throws TimerDateTimeException - wyjątek zostaje rzucony, gdy nastąpi błąd związany z pobraniem Eventu z bazy
+	 * 	Metoda importuje istniejÄ…ce Eventy z bazy XML przy uruchomieniu programu oraz tworzy na tej podstawie kolekcjÄ™ EventÃ³w
+	 * @throws ParseException - wyjÄ…tek zostaje rzucony, gdy wystÄ…pi bÅ‚Ä…d formatÃ³w dat
+	 * @throws EventEmptyFieldException - wyjÄ…tek zostaje rzucony, gdy nastÄ…pi bÅ‚Ä…d zwiÄ…zany z pobraniem Eventu z bazy
+	 * @throws EventInvalidDateException - wyjÄ…tek zostaje rzucony, gdy nastÄ…pi bÅ‚Ä…d zwiÄ…zany z pobraniem Eventu z bazy
+	 * @throws EventInvalidTimeException - wyjÄ…tek zostaje rzucony, gdy nastÄ…pi bÅ‚Ä…d zwiÄ…zany z pobraniem Eventu z bazy
+	 * @throws TimerDateTimeException - wyjÄ…tek zostaje rzucony, gdy nastÄ…pi bÅ‚Ä…d zwiÄ…zany z pobraniem Eventu z bazy
 	 */
 	private void importEventsFromXml() throws ParseException, EventEmptyFieldException, EventInvalidDateException,
 			EventInvalidTimeException, TimerDateTimeException {

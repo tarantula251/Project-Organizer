@@ -1,6 +1,8 @@
 package model;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -10,6 +12,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashMap;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -19,6 +26,11 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
@@ -27,6 +39,33 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public class DataIO {
+	
+	Connection dataBaseConnecion = null;
+	
+	
+	public HashMap<String, String> loadConfig() throws IOException
+	{
+		HashMap<String, String> config = new HashMap<String, String>();
+		
+		File configFile = new File("config.cfg");
+		BufferedReader configFileReader = new BufferedReader(new FileReader(configFile));
+		String line = configFileReader.readLine();
+		while(line != null)
+		{
+			String[] option = line.split("=");
+			if(option.length < 2) continue;
+			config.put(option[0], option[1]);
+			line = configFileReader.readLine();
+		}
+		configFileReader.close();
+		return config;
+	}
+	
+	public void connectToDatabase(String server, String database, String user, String password) throws SQLException
+	{
+		String url = "jdbc:mysql://"+server+"/"+database+"?serverTimezone=UTC";
+		dataBaseConnecion = DriverManager.getConnection(url, user, password);
+	}
 	
 	/**
 	 * 	Pole dataFile przechowujące instancję pliku z bazą danych.
@@ -106,6 +145,29 @@ public class DataIO {
 		}
 	}
 
+	public ArrayList<Event> getEventsFromDatabase() throws SQLException
+	{
+		if(dataBaseConnecion != null) throw new SQLException("No database connected");
+		Statement statement = dataBaseConnecion.createStatement();
+		ResultSet result = statement.executeQuery("SELECT * FROM events");
+		
+		ArrayList<Event> events = new ArrayList<Event>();
+		
+		while(result.next())
+		{
+			int id = result.getInt("id");
+			String title = result.getString("title");
+			String location = result.getString("location");
+			String description = result.getString("description");
+			Date start = result.getDate("start");
+			Date end = result.getDate("end");
+		}
+		
+		result.close();
+		statement.close();
+		return events;
+	}
+	
 	/**
 	 * Metoda pobiera listę węzłów z pliku XML, w którym przechowywane są dane o Eventach                  
 	 * @return NodeList - obiekt przechowujący listę węzłów zawierających dane o Eventach
