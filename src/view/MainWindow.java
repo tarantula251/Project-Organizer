@@ -24,6 +24,7 @@ import java.util.Date;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -76,9 +77,9 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 	private JFrame window = new JFrame("Organizer App");
 	private Container contentPane = window.getContentPane();
 
-	private JMenu menu, databaseSubmenu, eventsSubmenu;
+	private JMenu menu;
 	private JMenuBar menuBar;
-	private JMenuItem eSave, eOpen, dImport, dExport, gPreferences, gAbout, gExit;
+	private JMenuItem gAbout, gExit;
 	private JPanel calendarPanel;
 	private JTextField filename = new JTextField(), dir = new JTextField();
 	private EventManager eventManager;
@@ -267,41 +268,6 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		menuBar = new JMenuBar();
 		menuBar.add(menu);
 
-		databaseSubmenu = new JMenu("Database Action");
-		databaseSubmenu.setMnemonic(KeyEvent.VK_D);
-		databaseSubmenu.addMenuListener(this);
-		menu.add(databaseSubmenu);
-
-		eventsSubmenu = new JMenu("Event Action");
-		eventsSubmenu.setMnemonic(KeyEvent.VK_E);
-		eventsSubmenu.addMenuListener(this);
-		menu.add(eventsSubmenu);
-
-		eSave = new JMenuItem("Save event");
-		eSave.setMnemonic(KeyEvent.VK_S);
-		eSave.addActionListener(this);
-		eventsSubmenu.add(eSave);
-
-		eOpen = new JMenuItem("Open event");
-		eOpen.setMnemonic(KeyEvent.VK_O);
-		eOpen.addActionListener(this);
-		eventsSubmenu.add(eOpen);
-
-		dImport = new JMenuItem("Import data");
-		dImport.setMnemonic(KeyEvent.VK_I);
-		dImport.addActionListener(this);
-		databaseSubmenu.add(dImport);
-
-		dExport = new JMenuItem("Export data");
-		dExport.setMnemonic(KeyEvent.VK_E);
-		dExport.addActionListener(this);
-		databaseSubmenu.add(dExport);
-
-		gPreferences = new JMenuItem("Preferences");
-		gPreferences.setMnemonic(KeyEvent.VK_P);
-		gPreferences.addActionListener(this);
-		menu.add(gPreferences);
-
 		gAbout = new JMenuItem("About program");
 		gAbout.setMnemonic(KeyEvent.VK_A);
 		gAbout.addActionListener(this);
@@ -361,57 +327,7 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource().equals(dImport) || e.getSource().equals(eOpen)) {
-			JFileChooser chooser = new JFileChooser();
-			int status = chooser.showOpenDialog(null);
-			if (status == JFileChooser.APPROVE_OPTION) {
-				try {
-					filename.setText(chooser.getSelectedFile().getName());
-					dir.setText(chooser.getCurrentDirectory().toString());
-					if (chooser.getSelectedFile() == null)
-						throw new FileNotFoundException("No such file in file system");
-					if (chooser.getCurrentDirectory() == null)
-						throw new NotDirectoryException("No such directory in file system");
-				} catch (FileNotFoundException e1) {
-					return;
-				} catch (NotDirectoryException e1) {
-					return;
-				}
-			}
-
-			if (status == JFileChooser.CANCEL_OPTION) {
-				filename.setText("You pressed cancel");
-				dir.setText("");
-			}
-		}
-
-		if (e.getSource().equals(dExport) || e.getSource().equals(eSave)) {
-			JFileChooser chooser = new JFileChooser();
-			int status = chooser.showSaveDialog(null);
-			if (status == JFileChooser.APPROVE_OPTION) {
-				try {
-					filename.setText(chooser.getSelectedFile().getName());
-					dir.setText(chooser.getCurrentDirectory().toString());
-					if (chooser.getSelectedFile() == null)
-						throw new FileNotFoundException("No such file in file system");
-					if (chooser.getCurrentDirectory() == null)
-						throw new NotDirectoryException("No such directory in file system");
-				} catch (FileNotFoundException e1) {
-					return;
-				} catch (NotDirectoryException e1) {
-					return;
-				}
-			}
-
-			if (status == JFileChooser.CANCEL_OPTION) {
-				filename.setText("You pressed cancel");
-				dir.setText("");
-			}
-		}
-
-		if (e.getSource().equals(gPreferences)) {
-			// TODO go to preferences
-		}
+		
 
 		if (e.getSource().equals(gAbout)) {
 			JOptionPane.showMessageDialog(window, new AboutProgramWindow().getAboutProgramMessage(), "About Program",
