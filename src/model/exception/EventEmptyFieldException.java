@@ -1,5 +1,6 @@
 package model.exception;
 
+@SuppressWarnings("serial")
 public class EventEmptyFieldException extends Exception {
 
 	public EventEmptyFieldException() {

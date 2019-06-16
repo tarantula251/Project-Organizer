@@ -1,5 +1,6 @@
 package model.exception;
 
+@SuppressWarnings("serial")
 public class TimerDateTimeException extends Exception {
 
 	public TimerDateTimeException() {

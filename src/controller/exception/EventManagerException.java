@@ -1,5 +1,6 @@
 package controller.exception;
 
+@SuppressWarnings("serial")
 public class EventManagerException extends Exception {
 
 	public EventManagerException() {

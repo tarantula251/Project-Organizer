@@ -1,39 +1,26 @@
 package controller;
 
 import java.awt.EventQueue;
-import java.awt.Toolkit;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.Locale;
 import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.TimeUnit;
-
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.RowFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
-
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -98,8 +85,9 @@ public class EventManager {
 						}
 
 						Thread.sleep(1000);
-						
-					} catch (InterruptedException | ParseException | TimerDateTimeException | SAXException | IOException e) {
+
+					} catch (InterruptedException | ParseException | TimerDateTimeException | SAXException
+							| IOException e) {
 						e.printStackTrace();
 					} catch (EventEmptyFieldException e) {
 						// TODO Auto-generated catch block
@@ -217,7 +205,7 @@ public class EventManager {
 		String timerTime = timerFormat.format(timerValue);
 		String eventStart = startFormat.format(startTimeValue);
 
-		int timerHour, timerMinute, startHour, startMinute, alarmClockHour, alarmClockMinute, year, month, day;
+		int timerHour, timerMinute, startHour, startMinute, year, month, day;
 		timerHour = Integer.parseInt(timerTime.substring(0, 2));
 		timerMinute = Integer.parseInt(timerTime.substring(3, 5));
 		startHour = Integer.parseInt(eventStart.substring(0, 2));
@@ -318,7 +306,7 @@ public class EventManager {
 		} else
 			return;
 	}
-	
+
 	public void filterEventsTable(JTable table, String field) {
 		DefaultTableModel model = (DefaultTableModel) table.getModel();
 		TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<DefaultTableModel>(model);

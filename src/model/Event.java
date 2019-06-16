@@ -7,8 +7,6 @@ import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.GregorianCalendar;
-
 import model.exception.EventEmptyFieldException;
 import model.exception.EventInvalidDateException;
 import model.exception.EventInvalidTimeException;

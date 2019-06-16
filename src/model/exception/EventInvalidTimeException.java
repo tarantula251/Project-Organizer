@@ -1,5 +1,6 @@
 package model.exception;
 
+@SuppressWarnings("serial")
 public class EventInvalidTimeException extends Exception {
 
 	public EventInvalidTimeException() {

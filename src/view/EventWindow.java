@@ -6,7 +6,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SpinnerDateModel;
-import javax.swing.JSpinner.DateEditor;
 import javax.swing.text.DateFormatter;
 
 import com.toedter.calendar.JDateChooser;
@@ -37,7 +36,6 @@ import java.awt.event.ActionEvent;
 import javax.swing.JCheckBox;
 import java.awt.FlowLayout;
 import javax.swing.SwingConstants;
-import java.awt.Dialog.ModalExclusionType;
 
 public class EventWindow {
 
@@ -72,11 +70,10 @@ public class EventWindow {
 	private JPanel panel;
 	private int dialogResult = 0;
 
-	public void setVisible(Boolean visible)
-	{
+	public void setVisible(Boolean visible) {
 		frmEventCreator.setVisible(visible);
 	}
-	
+
 	public int getDialogResult() {
 		return dialogResult;
 	}

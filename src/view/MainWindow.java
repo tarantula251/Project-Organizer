@@ -1,31 +1,21 @@
 package view;
 
 import java.awt.BorderLayout;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.nio.file.NotDirectoryException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -37,9 +27,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableModel;
-
 import org.xml.sax.SAXException;
 
 import controller.EventManager;
@@ -53,8 +40,6 @@ import java.awt.FlowLayout;
 import javax.swing.SwingConstants;
 import java.awt.Font;
 import javax.swing.JTable;
-import javax.swing.border.BevelBorder;
-
 import model.Event;
 import model.exception.EventEmptyFieldException;
 import model.exception.EventInvalidDateException;
@@ -62,26 +47,16 @@ import model.exception.EventInvalidTimeException;
 import model.exception.TimerDateTimeException;
 
 import javax.swing.table.DefaultTableModel;
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
-import java.awt.GridLayout;
 import com.toedter.calendar.JCalendar;
-import java.awt.Component;
-import javax.swing.Box;
 import javax.swing.JSplitPane;
 import java.awt.event.KeyAdapter;
 
 public class MainWindow implements MenuListener, ActionListener, KeyListener {
 
-	private static final long serialVersionUID = 1L;
 	private JFrame window = new JFrame("Organizer App");
-	private Container contentPane = window.getContentPane();
-
 	private JMenu menu;
 	private JMenuBar menuBar;
 	private JMenuItem gAbout, gExit;
-	private JPanel calendarPanel;
-	private JTextField filename = new JTextField(), dir = new JTextField();
 	private EventManager eventManager;
 	private String eventDate;
 	private JButton createEventBtn;
@@ -98,13 +73,48 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 	private JSplitPane splitPaneFilter;
 	private JTextField txtFieldFilter;
 
-	public MainWindow() throws LineUnavailableException, IOException, UnsupportedAudioFileException, ParseException,
-			EventEmptyFieldException, EventInvalidDateException, EventInvalidTimeException, TimerDateTimeException {
-		eventManager = new EventManager(this);
-		initialize();
+	public MainWindow() throws Exception {
+		try {
+			eventManager = new EventManager(this);
+		} catch (LineUnavailableException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage(), "LineUnavailableException", JOptionPane.ERROR_MESSAGE);
+			e.printStackTrace();
+			throw new Exception();
+		} catch (IOException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage(), "IOException", JOptionPane.ERROR_MESSAGE);
+			e.printStackTrace();
+			throw new Exception();
+		} catch (UnsupportedAudioFileException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage(), "UnsupportedAudioFileException", JOptionPane.ERROR_MESSAGE);
+			e.printStackTrace();
+			throw new Exception();
+		} catch (ParseException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage(), "ParseException", JOptionPane.ERROR_MESSAGE);
+			e.printStackTrace();
+			throw new Exception();
+		} catch (EventEmptyFieldException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage(), "EventEmptyFieldException", JOptionPane.ERROR_MESSAGE);
+			e.printStackTrace();
+			throw new Exception();
+		} catch (EventInvalidDateException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage(), "EventInvalidDateException", JOptionPane.ERROR_MESSAGE);
+			e.printStackTrace();
+			throw new Exception();
+		} catch (EventInvalidTimeException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage(), "EventInvalidTimeException", JOptionPane.ERROR_MESSAGE);
+			e.printStackTrace();
+			throw new Exception();
+		} catch (TimerDateTimeException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage(), "TimerDateTimeException", JOptionPane.ERROR_MESSAGE);
+			e.printStackTrace();
+			throw new Exception();
+		} catch(Exception e)
+		{
+			throw new Exception();
+		}
 	}
 
-	private void initialize() throws ParseException {
+	public void initialize(){
 		window.setResizable(false);
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		addCalendar();
@@ -139,6 +149,7 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		this.eventDate = eventDate;
 	}
 
+	@SuppressWarnings("serial")
 	private void addCalendar() {
 		window.getContentPane().setLayout(new BoxLayout(window.getContentPane(), BoxLayout.X_AXIS));
 
@@ -177,7 +188,7 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		gbl_panel.columnWeights = new double[] { 1.0 };
 		gbl_panel.rowWeights = new double[] { 0.0, 0.0, 1.0 };
 		panel.setLayout(gbl_panel);
-		
+
 		splitPaneFilter = new JSplitPane();
 		GridBagConstraints gbc_splitPaneFilter = new GridBagConstraints();
 		gbc_splitPaneFilter.fill = GridBagConstraints.BOTH;
@@ -191,7 +202,7 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		labelFilter.setHorizontalAlignment(SwingConstants.LEFT);
 		labelFilter.setLabelFor(panel);
 		labelFilter.setFont(new Font("Tahoma", Font.PLAIN, 12));
-		
+
 		txtFieldFilter = new JTextField();
 		txtFieldFilter.addKeyListener(new KeyAdapter() {
 			@Override
@@ -202,7 +213,7 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		});
 		splitPaneFilter.setRightComponent(txtFieldFilter);
 		txtFieldFilter.setColumns(10);
-		
+
 		labelEvents = new JLabel("View your events: ");
 		labelEvents.setHorizontalAlignment(SwingConstants.LEFT);
 		labelEvents.setFont(new Font("Tahoma", Font.PLAIN, 12));
@@ -225,8 +236,10 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		};
 		table.setModel(
 				new DefaultTableModel(new Object[][] {}, new String[] { "Id", "Title", "Start date", "Start time" }) {
+					@SuppressWarnings("rawtypes")
 					Class[] columnTypes = new Class[] { Integer.class, Object.class, Object.class, Object.class };
 
+					@SuppressWarnings("unchecked")
 					public Class getColumnClass(int columnIndex) {
 						return columnTypes[columnIndex];
 					}
@@ -327,7 +340,6 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		
 
 		if (e.getSource().equals(gAbout)) {
 			JOptionPane.showMessageDialog(window, new AboutProgramWindow().getAboutProgramMessage(), "About Program",
@@ -347,16 +359,17 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		}
 
 		if (e.getSource().equals(deleteEventBtn)) {
-			int eventId = (Integer)table.getModel().getValueAt(table.getSelectedRow(), 0);
-			if(JOptionPane.showConfirmDialog(null, "Do you really want to remove selected event?", "Delete event", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION)
-			{
+			int eventId = (Integer) table.getModel().getValueAt(table.getSelectedRow(), 0);
+			if (JOptionPane.showConfirmDialog(null, "Do you really want to remove selected event?", "Delete event",
+					JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 				try {
 					eventManager.removeEvent(eventId);
 					refreshEventsTable();
-				} catch (EventManagerException | SAXException | IOException | ParseException | EventEmptyFieldException | EventInvalidDateException | EventInvalidTimeException | TimerDateTimeException e1) {
+				} catch (EventManagerException | SAXException | IOException | ParseException | EventEmptyFieldException
+						| EventInvalidDateException | EventInvalidTimeException | TimerDateTimeException e1) {
 					JOptionPane.showMessageDialog(null, e1.getMessage(), "Delete event", JOptionPane.ERROR_MESSAGE);
-						e1.printStackTrace();
-					}
+					e1.printStackTrace();
+				}
 			}
 		}
 
