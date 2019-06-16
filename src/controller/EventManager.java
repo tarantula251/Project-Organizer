@@ -29,7 +29,6 @@ import org.xml.sax.SAXException;
 import com.toedter.calendar.JDateChooser;
 
 import controller.exception.EventManagerException;
-import model.AlarmSoundTimerTask;
 import model.DataIO;
 import model.Event;
 import model.exception.EventEmptyFieldException;
@@ -47,7 +46,6 @@ public class EventManager {
 	String directory = "databank";
 	String eventsFilename = "data.xml";
 	Clip clip;
-	private volatile Boolean alarmDismissed = false;
 
 	public EventManager(MainWindow mainWindow)
 			throws LineUnavailableException, IOException, UnsupportedAudioFileException, ParseException,
@@ -221,32 +219,6 @@ public class EventManager {
 		Date goOff = sdf.parse(resultString);
 
 		return goOff;
-	}
-
-	public void goOffAlarm(Date goOffDate) {
-		Timer timer = new Timer();
-		Thread thread = new Thread(new Runnable() {
-			public void run() {
-				try {
-					clip.start();
-					Thread.sleep(100);
-					while (clip.isActive()) {
-						if (alarmDismissed) {
-							clip.stop();
-							alarmDismissed = false;
-							break;
-						}
-					}
-				} catch (Exception e) {
-					System.err.println(e.getMessage());
-				}
-			}
-		});
-		timer.schedule(new AlarmSoundTimerTask(thread), goOffDate);
-	}
-
-	public void dismissAlarm() throws InterruptedException {
-		alarmDismissed = true;
 	}
 
 	public void addRowToTable(JTable table) throws ParseException {
