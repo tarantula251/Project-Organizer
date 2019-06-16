@@ -56,14 +56,14 @@ public class Event implements Comparable<Event> {
 	
 	/**
 	 * 	Konstruktor tworzy obiekt klasy Event, przechowujący wszystkie informacje o nim, wymagane parametry są niezbędne do stworzenia Eventu
-	 * @param title
-	 * @param description
-	 * @param location
-	 * @param startDate
-	 * @param endDate
-	 * @param startTime
-	 * @param endTime
-	 * @param alarmDateTimeValue
+	 * @param title - tytuł Eventu
+	 * @param description - opis Eventu
+	 * @param location - lokalizacja Eventu
+	 * @param startDate - data początkowa Eventu
+	 * @param endDate - data końcowa Eventu
+	 * @param startTime - czas początkowy Eventu
+	 * @param endTime - czas końcowy Eventu
+	 * @param alarmDateTimeValue - czas uruchomienia alarmu
 	 * @throws EventEmptyFieldException - wyjątek zostaje rzucony, gdy podany zostanie pusty parametr
 	 * @throws EventInvalidDateException - wyjątek zostaje rzucony, gdy podany zostanie parametr z nieprawidłową datą
 	 * @throws EventInvalidTimeException - wyjątek zostaje rzucony, gdy podany zostanie parametr z nieprawidłowym czasem
