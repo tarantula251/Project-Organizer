@@ -361,7 +361,7 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		if (e.getSource().equals(deleteEventBtn)) {
 			if(table.getSelectedRowCount() > 0)
 			{
-				int eventId = (Integer) table.getModel().getValueAt(table.getSelectedRow(), 0);
+				int eventId = (Integer) table.getValueAt(table.getSelectedRow(), 0);
 				if (JOptionPane.showConfirmDialog(null, "Do you really want to remove selected event?", "Delete event",
 						JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 					try {
