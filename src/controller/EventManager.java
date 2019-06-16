@@ -296,13 +296,9 @@ public class EventManager {
 					index = Integer.parseInt(eElement.getAttribute("id"));
 					fetchedEvent.setIndex(index);
 
-					System.out.println("fetchedEvent " + fetchedEvent);
-
 					eventCollection.add(fetchedEvent);
 				}
 			}
-			for (int i = 0; i < eventCollection.size(); i++)
-				System.out.println(eventCollection.get(i));
 		} else
 			return;
 	}

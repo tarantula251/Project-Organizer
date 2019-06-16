@@ -102,8 +102,6 @@ public class DataIO {
 
 			transformer.transform(source, result);
 
-			System.out.println("New file created and saved!");
-
 		} catch (ParserConfigurationException pce) {
 			pce.printStackTrace();
 		} catch (TransformerException tfe) {
@@ -211,8 +209,6 @@ public class DataIO {
 			DOMSource source = new DOMSource(doc);
 			StreamResult result = new StreamResult(dataFile);
 			transformer.transform(source, result);
-
-			System.out.println("Text appended and saved!");
 
 		} catch (ParserConfigurationException pce) {
 			pce.printStackTrace();
