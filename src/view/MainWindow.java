@@ -239,7 +239,7 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 					@SuppressWarnings("rawtypes")
 					Class[] columnTypes = new Class[] { Integer.class, Object.class, Object.class, Object.class };
 
-					@SuppressWarnings("unchecked")
+					@SuppressWarnings({ "unchecked", "rawtypes" })
 					public Class getColumnClass(int columnIndex) {
 						return columnTypes[columnIndex];
 					}
