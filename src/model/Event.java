@@ -55,7 +55,20 @@ public class Event implements Comparable<Event> {
 	private Date alarmDateTime;
 	
 	/**
-	 * 	Konstruktor tworzy obiekt klasy Event, przechowujący wszystkie informacje o nim
+	 * 	Konstruktor tworzy obiekt klasy Event, przechowujący wszystkie informacje o nim, wymagane parametry są niezbędne do stworzenia Eventu
+	 * @param title
+	 * @param description
+	 * @param location
+	 * @param startDate
+	 * @param endDate
+	 * @param startTime
+	 * @param endTime
+	 * @param alarmDateTimeValue
+	 * @throws EventEmptyFieldException - wyjątek zostaje rzucony, gdy podany zostanie pusty parametr
+	 * @throws EventInvalidDateException - wyjątek zostaje rzucony, gdy podany zostanie parametr z nieprawidłową datą
+	 * @throws EventInvalidTimeException - wyjątek zostaje rzucony, gdy podany zostanie parametr z nieprawidłowym czasem
+	 * @throws ParseException - wyjątek zostaje rzucony, gdy nastąpi błąd związany z formatem daty
+	 * @throws TimerDateTimeException - wyjątek zostaje rzucony, gdy podany zostanie parametr z nieprawidłowym czasem
 	 */
 	public Event(String title, String description, String location, String startDate, String endDate, String startTime, String endTime, Date alarmDateTimeValue) throws EventEmptyFieldException, EventInvalidDateException, EventInvalidTimeException, ParseException, TimerDateTimeException {
 		setTitle(title);
