@@ -25,7 +25,7 @@ public class Event {
 	private String endTime;
 	private Integer index;
 	private Date alarmDateTime;
-
+	
 	public Event(String title, String description, String location, String startDate, String endDate, String startTime, String endTime, Date alarmDateTimeValue) throws EventEmptyFieldException, EventInvalidDateException, EventInvalidTimeException, ParseException, TimerDateTimeException {
 		setTitle(title);
 		setDescription(description);
@@ -35,9 +35,9 @@ public class Event {
 		setStartTime(startTime);
 		setEndTime(endTime);
 		setAlarmDateTime(alarmDateTimeValue);		
-		index = ++counter;		
+		index = ++counter;	
 	}
-	
+
 	public void setIndex(Integer index) {
 		this.index = index;
 	}

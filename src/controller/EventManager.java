@@ -28,7 +28,11 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.RowFilter;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -74,6 +78,10 @@ public class EventManager {
 						for (Event event : eventCollection) {
 							if (event.getAlarmDateTime() != null) {
 								Date date = new Date();
+								
+								System.out.println("curr date " + date.toString());
+								System.out.println("eve date " + event.getAlarmDateTime().toString());
+								
 								int comparedTime = date.compareTo(event.getAlarmDateTime());
 								if (comparedTime >= 0) {
 									clip.start();
@@ -93,13 +101,7 @@ public class EventManager {
 						
 						Thread.sleep(1000);
 						
-					} catch (InterruptedException | ParseException | TimerDateTimeException e) {
-						e.printStackTrace();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (SAXException e) {
-						// TODO Auto-generated catch block
+					} catch (InterruptedException | ParseException | TimerDateTimeException | SAXException | IOException e) {
 						e.printStackTrace();
 					} catch (EventEmptyFieldException e) {
 						// TODO Auto-generated catch block
@@ -302,4 +304,13 @@ public class EventManager {
 			System.out.println(eventCollection.get(i));
 	    } else return;		
 	}
+	
+	public void filterEventsTable(JTable table, String field) {
+		DefaultTableModel model = (DefaultTableModel) table.getModel();
+		TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<DefaultTableModel>(model);
+		table.setRowSorter(sorter);
+		sorter.setRowFilter(RowFilter.regexFilter(field));
+
+	}
+
 }

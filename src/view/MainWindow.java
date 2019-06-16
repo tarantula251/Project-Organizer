@@ -63,6 +63,8 @@ import java.awt.GridLayout;
 import com.toedter.calendar.JCalendar;
 import java.awt.Component;
 import javax.swing.Box;
+import javax.swing.JSplitPane;
+import java.awt.event.KeyAdapter;
 
 public class MainWindow implements MenuListener, ActionListener, KeyListener {
 
@@ -80,13 +82,16 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 	private JButton createEventBtn;
 	private JLabel label;
 	private JTextField textField;
-	private JLabel labelEvents;
+	private JLabel labelFilter;
 	private JScrollPane scrollPane;
 	private JTable table;
 	private JCalendar calendarWidget;
 	private JPanel panel;
 	private final JButton deleteEventBtn = new JButton("Delete event");
 	private JPanel panelButtons;
+	private JLabel labelEvents;
+	private JSplitPane splitPaneFilter;
+	private JTextField txtFieldFilter;
 
 	public MainWindow() throws LineUnavailableException, IOException, UnsupportedAudioFileException, ParseException,
 			EventEmptyFieldException, EventInvalidDateException, EventInvalidTimeException, TimerDateTimeException {
@@ -163,20 +168,44 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		window.getContentPane().add(panel);
 		GridBagLayout gbl_panel = new GridBagLayout();
 		gbl_panel.columnWidths = new int[] { 363 };
-		gbl_panel.rowHeights = new int[] { 21, 233 };
+		gbl_panel.rowHeights = new int[] { 21, 0, 233 };
 		gbl_panel.columnWeights = new double[] { 1.0 };
-		gbl_panel.rowWeights = new double[] { 0.0, 1.0 };
+		gbl_panel.rowWeights = new double[] { 0.0, 0.0, 1.0 };
 		panel.setLayout(gbl_panel);
+		
+		splitPaneFilter = new JSplitPane();
+		GridBagConstraints gbc_splitPaneFilter = new GridBagConstraints();
+		gbc_splitPaneFilter.fill = GridBagConstraints.BOTH;
+		gbc_splitPaneFilter.insets = new Insets(0, 0, 5, 0);
+		gbc_splitPaneFilter.gridx = 0;
+		gbc_splitPaneFilter.gridy = 0;
+		panel.add(splitPaneFilter, gbc_splitPaneFilter);
 
+		labelFilter = new JLabel("Filter events by:");
+		splitPaneFilter.setLeftComponent(labelFilter);
+		labelFilter.setHorizontalAlignment(SwingConstants.LEFT);
+		labelFilter.setLabelFor(panel);
+		labelFilter.setFont(new Font("Tahoma", Font.PLAIN, 12));
+		
+		txtFieldFilter = new JTextField();
+		txtFieldFilter.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				String filterByField = txtFieldFilter.getText().toLowerCase();
+				eventManager.filterEventsTable(table, filterByField);
+			}
+		});
+		splitPaneFilter.setRightComponent(txtFieldFilter);
+		txtFieldFilter.setColumns(10);
+		
 		labelEvents = new JLabel("View your events: ");
 		labelEvents.setHorizontalAlignment(SwingConstants.LEFT);
-		labelEvents.setLabelFor(panel);
 		labelEvents.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		GridBagConstraints gbc_labelEvents = new GridBagConstraints();
-		gbc_labelEvents.fill = GridBagConstraints.BOTH;
+		gbc_labelEvents.anchor = GridBagConstraints.WEST;
 		gbc_labelEvents.insets = new Insets(0, 0, 5, 0);
 		gbc_labelEvents.gridx = 0;
-		gbc_labelEvents.gridy = 0;
+		gbc_labelEvents.gridy = 1;
 		panel.add(labelEvents, gbc_labelEvents);
 
 		scrollPane = new JScrollPane();
@@ -202,7 +231,7 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
 		gbc_scrollPane.fill = GridBagConstraints.BOTH;
 		gbc_scrollPane.gridx = 0;
-		gbc_scrollPane.gridy = 1;
+		gbc_scrollPane.gridy = 2;
 		panel.add(scrollPane, gbc_scrollPane);
 	}
 
