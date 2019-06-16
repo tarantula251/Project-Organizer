@@ -171,7 +171,14 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 
 		scrollPane = new JScrollPane();
 
-		table = new JTable();
+		table = new JTable() {
+
+			@Override
+			public boolean isCellEditable(int row, int column) {
+				return false;
+			}
+			
+		};
 		table.setModel(new DefaultTableModel(new Object[][] {}, new String[] { "Title", "Start date", "Start time" }));
 		scrollPane.setViewportView(table);
 		GridBagConstraints gbc_scrollPane = new GridBagConstraints();

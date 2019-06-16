@@ -33,9 +33,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import com.pff.PSTException;
-import com.pff.PSTFile;
-
 public class DataIO {
 
 	private File dataFile;
@@ -232,11 +229,5 @@ public class DataIO {
 		} catch (TransformerException tfe) {
 			tfe.printStackTrace();
 		}
-	}
-	
-	public void exportToOutlookFormat(Event event) {
-		File outlookFile = new File("export/eventsData.pst");
-		
-		
 	}
 }

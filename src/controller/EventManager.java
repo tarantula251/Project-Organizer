@@ -83,6 +83,10 @@ public class EventManager {
 													+ event.getEndTime() + "\n");
 									clip.stop();
 									event.setAlarmDateTime(null);
+									String directory = "databank";
+									String filename = "data.xml";
+									createDirectory(directory);
+									sendDataToXml(event, directory + "/" + filename);
 								}
 							}
 						}
@@ -90,6 +94,21 @@ public class EventManager {
 						Thread.sleep(1000);
 						
 					} catch (InterruptedException | ParseException | TimerDateTimeException e) {
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (SAXException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (EventEmptyFieldException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (EventInvalidDateException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (EventInvalidTimeException e) {
+						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -109,11 +128,20 @@ public class EventManager {
 	}
 
 	private void sendDataToXml(Event event, String filename) throws SAXException, IOException, ParseException, EventEmptyFieldException, EventInvalidDateException, EventInvalidTimeException, TimerDateTimeException {		
-		if (eventCollection.size() == 1) {
-			dataIo.writeToXml(event, filename);					
-		} else {
-			dataIo.appendXml(event);
+		dataIo.writeToXml(event, filename);
+		if(eventCollection.size() > 1)
+		{
+			for(Event existingEvent : eventCollection)
+			{
+				if(existingEvent != event) dataIo.appendXml(event);
+			}
 		}
+	}
+	
+	void createDirectory(String directory) throws IOException
+	{
+		var path = Paths.get(directory);
+		if(!Files.exists(path)) Files.createDirectory(path);
 	}
 	
 	public void addEvent(String titleValue, String descriptionValue, String locationValue, String startDateValue,
@@ -126,8 +154,7 @@ public class EventManager {
 					
 			String directory = "databank";
 			String filename = "data.xml";
-			var path = Paths.get(directory);
-			if(!Files.exists(path)) Files.createDirectory(path);
+			createDirectory(directory);
 									
 			sendDataToXml(event, directory + "/" + filename);
 			
