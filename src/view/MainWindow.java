@@ -196,7 +196,7 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		txtFieldFilter.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyReleased(KeyEvent e) {
-				String filterByField = txtFieldFilter.getText().toLowerCase();
+				String filterByField = txtFieldFilter.getText();
 				eventManager.filterEventsTable(table, filterByField);
 			}
 		});
