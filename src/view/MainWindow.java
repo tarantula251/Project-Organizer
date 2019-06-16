@@ -85,8 +85,11 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 	private JTable table;
 	private JCalendar calendarWidget;
 	private JPanel panel;
+	private final JButton deleteEventBtn = new JButton("Delete event");
+	private JPanel panelButtons;
 
-	public MainWindow() throws LineUnavailableException, IOException, UnsupportedAudioFileException, ParseException, EventEmptyFieldException, EventInvalidDateException, EventInvalidTimeException, TimerDateTimeException {		
+	public MainWindow() throws LineUnavailableException, IOException, UnsupportedAudioFileException, ParseException,
+			EventEmptyFieldException, EventInvalidDateException, EventInvalidTimeException, TimerDateTimeException {
 		eventManager = new EventManager(this);
 		initialize();
 	}
@@ -101,14 +104,15 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		window.setVisible(true);
 		refreshEventsTable();
 	}
-	
-	public void refreshEventsTable()
-	{
-		var model = (DefaultTableModel)table.getModel();
+
+	public void refreshEventsTable() {
+		var model = (DefaultTableModel) table.getModel();
 		model.setRowCount(0);
-		for(Event event : eventManager.getEventCollection()) model.addRow(new Object[] {event.getTitle(), event.getStartDate().toString(), event.getStartTime().toString()});
+		for (Event event : eventManager.getEventCollection())
+			model.addRow(new Object[] { event.getIndex(), event.getTitle(), event.getStartDate().toString(),
+					event.getStartTime().toString() });
 	}
-	
+
 	public JFrame getWindow() {
 		return window;
 	}
@@ -143,10 +147,16 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		textField.setText("2019-06-15");
 		textField.setFont(new Font("Tahoma", Font.PLAIN, 12));
 
+		panelButtons = new JPanel();
+		calendarWidget.getDayChooser().add(panelButtons, BorderLayout.SOUTH);
+		panelButtons.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
+
 		createEventBtn = new JButton("Create event");
-		calendarWidget.getDayChooser().add(createEventBtn, BorderLayout.SOUTH);
-		createEventBtn.setBounds(208, 287, 99, 23);
+		panelButtons.add(createEventBtn);
 		createEventBtn.setFont(new Font("Tahoma", Font.PLAIN, 12));
+		deleteEventBtn.addActionListener(this);
+		deleteEventBtn.setFont(new Font("Tahoma", Font.PLAIN, 12));
+		panelButtons.add(deleteEventBtn);
 		createEventBtn.addActionListener(this);
 
 		panel = new JPanel();
@@ -177,9 +187,17 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 			public boolean isCellEditable(int row, int column) {
 				return false;
 			}
-			
+
 		};
-		table.setModel(new DefaultTableModel(new Object[][] {}, new String[] { "Title", "Start date", "Start time" }));
+		table.setModel(
+				new DefaultTableModel(new Object[][] {}, new String[] { "Id", "Title", "Start date", "Start time" }) {
+					Class[] columnTypes = new Class[] { Integer.class, Object.class, Object.class, Object.class };
+
+					public Class getColumnClass(int columnIndex) {
+						return columnTypes[columnIndex];
+					}
+				});
+		table.getColumnModel().getColumn(0).setPreferredWidth(40);
 		scrollPane.setViewportView(table);
 		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
 		gbc_scrollPane.fill = GridBagConstraints.BOTH;
@@ -375,7 +393,12 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 			EventWindow eventWindow = new EventWindow(this);
 			eventManager.fillStartDateField(eventWindow);
 			eventWindow.setVisible(true);
-			if(eventWindow.getDialogResult() == 1) refreshEventsTable();
+			if (eventWindow.getDialogResult() == 1)
+				refreshEventsTable();
+		}
+
+		if (e.getSource().equals(deleteEventBtn)) {
+			int eventIndex = table.getSelectedRow();
 		}
 
 	}
