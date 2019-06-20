@@ -112,7 +112,9 @@ public class EventManager {
 													+ "\n");
 									clip.stop();
 									event.setAlarmDateTime(null);
-									dataIo.updateEventInDatabase(event);
+									try {
+										dataIo.updateEventInDatabase(event);
+									} catch (SQLException e) {}
 									createDirectory(directory);
 									sendDataToXml(event, directory + "/" + eventsFilename);
 								}
@@ -123,12 +125,7 @@ public class EventManager {
 
 					} catch (InterruptedException | TimerDateTimeException | EventInvalidTimeException | SAXException
 							| IOException e) {
-						e.printStackTrace();
-					} catch (SQLException e) {
-						// TODO Auto-generated catch block
-						System.out.println(e.getMessage());
-						e.printStackTrace();
-					}
+					} 
 				}
 			}
 		});
@@ -136,7 +133,7 @@ public class EventManager {
 		alarmCheckThread.start();
 	}
 
-	private void loadConfig() throws EventManagerException
+	public void loadConfig() throws EventManagerException
 	{
 		try {
 			config = dataIo.loadConfig();
@@ -146,16 +143,26 @@ public class EventManager {
 		
 	}
 	
-	private boolean connectToDatabase()
+	public void saveConfig() throws EventManagerException
 	{
-		String server = config.get("server");
+		try {
+			dataIo.saveConfig(config);
+		} catch (IOException e) {
+			throw new EventManagerException("Couldn't open config from file.\nPleae, check for config file in application directory.");
+		}	
+	}
+	
+	public boolean connectToDatabase()
+	{
+		String server = config.get("hostname");
+		String port = config.get("port");
 		String database = config.get("database");
-		String user = config.get("user");
+		String user = config.get("username");
 		String password = config.get("password");
 		if(server == null || database == null || user == null || password == null) return false;
 		
 		try {
-			dataIo.connectToDatabase(server, database, user, password);
+			dataIo.connectToDatabase(server, port, database, user, password);
 			return true;
 		} catch (SQLException e) {
 		    System.out.println("SQLException: " + e.getMessage());
@@ -166,6 +173,10 @@ public class EventManager {
 		
 	}
 	
+	public HashMap<String, String> getConfig() {
+		return config;
+	}
+
 	public ArrayList<Event> getEventCollection() {
 		return eventCollection;
 	}

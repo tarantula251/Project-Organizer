@@ -1,8 +1,10 @@
 package model;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -48,7 +50,6 @@ public class DataIO {
 	
 	Connection dataBaseConnecion = null;
 	
-	
 	public HashMap<String, String> loadConfig() throws IOException
 	{
 		HashMap<String, String> config = new HashMap<String, String>();
@@ -67,9 +68,21 @@ public class DataIO {
 		return config;
 	}
 	
-	public void connectToDatabase(String server, String database, String user, String password) throws SQLException
+	public void saveConfig(HashMap<String, String> config) throws IOException
 	{
-		String url = "jdbc:mysql://"+server+"/"+database;
+		File configFile = new File("config.cfg");
+		BufferedWriter configFileWriter = new BufferedWriter(new FileWriter(configFile));
+		configFileWriter.write("hostname=" + config.get("hostname") + "\n");
+		configFileWriter.write("port=" + config.get("port") + "\n");
+		configFileWriter.write("database=" + config.get("database") + "\n");
+		configFileWriter.write("username=" + config.get("username") + "\n");
+		configFileWriter.write("password=" + config.get("password"));
+		configFileWriter.close();
+	}
+	
+	public void connectToDatabase(String server, String port, String database, String user, String password) throws SQLException
+	{
+		String url = "jdbc:mysql://"+server+":"+port+"/"+database;
 		dataBaseConnecion = DriverManager.getConnection(url, user, password);
 	}
 	
@@ -155,7 +168,7 @@ public class DataIO {
 	{
 		if(dataBaseConnecion == null) throw new SQLException("No database connected");
 		Statement statement = dataBaseConnecion.createStatement();
-		ResultSet result = statement.executeQuery("SELECT * FROM events");
+		ResultSet result = statement.executeQuery("SELECT * FROM events ORDER BY start");
 		
 		ArrayList<Event> events = new ArrayList<Event>();
 		
@@ -335,6 +348,12 @@ public class DataIO {
 		} catch (ParserConfigurationException | TransformerException pce) {
 			pce.printStackTrace();
 		}
+	}
+	
+	public static Connection testConnectionToDatabase(String server, String port, String database, String user, String password) throws SQLException
+	{
+		String url = "jdbc:mysql://"+server+":"+port+"/"+database;
+		return DriverManager.getConnection(url, user, password);
 	}
 
 	public static String parseDateToString(Date date) {

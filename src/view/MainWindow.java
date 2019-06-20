@@ -54,6 +54,8 @@ import javax.swing.table.DefaultTableModel;
 import com.toedter.calendar.JCalendar;
 import javax.swing.JSplitPane;
 import java.awt.event.KeyAdapter;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 
 public class MainWindow implements MenuListener, ActionListener, KeyListener {
 
@@ -76,6 +78,8 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 	private JLabel labelEvents;
 	private JSplitPane splitPaneFilter;
 	private JTextField txtFieldFilter;
+	private final Action action = new SwingAction();
+	private JMenuItem gSettings;
 
 	/**
 	 * 	Konstruktor tworzy obiekt klasy MainWindow, który jest głównym oknem aplikacji.
@@ -306,11 +310,17 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		gAbout = new JMenuItem("About program");
 		gAbout.setMnemonic(KeyEvent.VK_A);
 		gAbout.addActionListener(this);
-		menu.add(gAbout);
+		
+		gSettings = new JMenuItem("Settings");
+		gSettings.setMnemonic(KeyEvent.VK_S);
+		gSettings.addActionListener(this);
 
 		gExit = new JMenuItem("Exit");
 		gExit.setMnemonic(KeyEvent.VK_X);
 		gExit.addActionListener(this);
+		
+		menu.add(gSettings);
+		menu.add(gAbout);
 		menu.add(gExit);
 
 		window.setJMenuBar(menuBar);
@@ -362,6 +372,31 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
+		if (e.getSource().equals(gSettings)) {
+			SettingsDialog settingsDialog = new SettingsDialog(this);
+			settingsDialog.setVisible(true);
+			if(settingsDialog.getDialogResult() == 1)
+			{
+				try {
+					eventManager.saveConfig();
+				} catch (EventManagerException e1) {
+					JOptionPane.showMessageDialog(window, e1.getMessage(), "Configuration",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				if(eventManager.connectToDatabase())
+				{
+					eventManager.importEventsFromDatabase();
+					refreshEventsTable();
+				}
+				else
+				{
+					JOptionPane.showMessageDialog(window, "Connection to database could not be established. Backup XML file will be used.", "Database",
+							JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		}
+		
 		if (e.getSource().equals(gAbout)) {
 			JOptionPane.showMessageDialog(window, new AboutProgramWindow().getAboutProgramMessage(), "About Program",
 					JOptionPane.PLAIN_MESSAGE);
@@ -401,5 +436,13 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 	public void showPane(String title, String infoMessage) {
 		JOptionPane.showMessageDialog(null, infoMessage, title, JOptionPane.INFORMATION_MESSAGE);
 
+	}
+	private class SwingAction extends AbstractAction {
+		public SwingAction() {
+			putValue(NAME, "SwingAction");
+			putValue(SHORT_DESCRIPTION, "Some short description");
+		}
+		public void actionPerformed(ActionEvent e) {
+		}
 	}
 }
