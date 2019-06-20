@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 import javax.sound.sampled.LineUnavailableException;
@@ -27,6 +28,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
+
+import model.DataIO;
 import org.xml.sax.SAXException;
 
 import controller.EventManager;
@@ -134,12 +137,11 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 	/**
 	 * 	Metoda odświeża wygląd tabeli z Eventami, gdy kolekcja Eventów jest aktualizowana
 	 */
-	public void refreshEventsTable() {
+	private void refreshEventsTable() {
 		var model = (DefaultTableModel) table.getModel();
 		model.setRowCount(0);
 		for (Event event : eventManager.getEventCollection())
-			model.addRow(new Object[] { event.getIndex(), event.getTitle(), event.getStartDate().toString(),
-					event.getStartTime().toString() });
+			model.addRow(new Object[] { event.getIndex(), event.getTitle(), DataIO.parseDateToString(event.getStartDate()) });
 	}
 
 	public JFrame getWindow() {
@@ -176,8 +178,9 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 
 		textField = new JTextField();
 		calendarWidget.getYearChooser().add(textField, BorderLayout.NORTH);
+		calendarWidget.getYearChooser().setYear(Calendar.getInstance().get(Calendar.YEAR));
 		textField.setBounds(772, 288, 46, 21);
-		textField.setText("2019-06-15");
+		textField.setText(DataIO.parseDateToStringDateOnly(new Date()));
 		textField.setFont(new Font("Tahoma", Font.PLAIN, 12));
 
 		panelButtons = new JPanel();
@@ -185,6 +188,7 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		panelButtons.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
 
 		createEventBtn = new JButton("Create event");
+		createEventBtn.setMnemonic(KeyEvent.VK_C);
 		panelButtons.add(createEventBtn);
 		createEventBtn.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		deleteEventBtn.addActionListener(this);
@@ -247,11 +251,10 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 
 		};
 		table.setModel(
-				new DefaultTableModel(new Object[][] {}, new String[] { "Id", "Title", "Start date", "Start time" }) {
+				new DefaultTableModel(new Object[][] {}, new String[] { "Id", "Title", "Start date" }) {
 					@SuppressWarnings("rawtypes")
-					Class[] columnTypes = new Class[] { Integer.class, Object.class, Object.class, Object.class };
+					Class[] columnTypes = new Class[] { Integer.class, Object.class, Object.class };
 
-					@SuppressWarnings({ "unchecked", "rawtypes" })
 					public Class getColumnClass(int columnIndex) {
 						return columnTypes[columnIndex];
 					}
@@ -311,7 +314,6 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 
 	private void addKeyListener(MainWindow mainWindow) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -322,10 +324,7 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 
 	@Override
 	public void keyPressed(KeyEvent e) {
-		if (e.getKeyChar() == 'x') {
-			System.exit(0);
-		}
-
+		// TODO Auto-generated method stub
 	}
 
 	@Override
@@ -385,8 +384,7 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 					try {
 						eventManager.removeEvent(eventId);
 						refreshEventsTable();
-					} catch (EventManagerException | SAXException | IOException | ParseException | EventEmptyFieldException
-							| EventInvalidDateException | EventInvalidTimeException | TimerDateTimeException e1) {
+					} catch (EventManagerException | SAXException | IOException e1) {
 						JOptionPane.showMessageDialog(null, e1.getMessage(), "Delete event", JOptionPane.ERROR_MESSAGE);
 						e1.printStackTrace();
 					}

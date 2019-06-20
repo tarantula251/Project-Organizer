@@ -5,8 +5,11 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -30,19 +33,14 @@ public class DataIO {
 	 */
 	private File dataFile;
 
-	public File getDataFile() {
-		return dataFile;
-	}
-
-	public void setDataFile(File dataFile) {
+	private void setDataFile(File dataFile) {
 		this.dataFile = dataFile;
 	}
 
 	/**
 	 * 	Konstruktor tworzy obiekt klasy DataIO, odpowiedzialnej za odczyt oraz zapis danych do bazy danych.
 	 */
-	public DataIO() {
-	}
+	public DataIO() {}
 
 	/**
 	 * Metoda tworzy nowy plik będący bazą danych oraz zapisuje do niego dane nowo utworzonego Eventu.                       
@@ -79,26 +77,16 @@ public class DataIO {
 			eventHeader.appendChild(location);
 
 			Element startDate = doc.createElement("startDate");
-			startDate.appendChild(doc.createTextNode(event.getStartDate()));
+			startDate.appendChild(doc.createTextNode(parseDateToString(event.getStartDate())));
 			eventHeader.appendChild(startDate);
 
-			Element startTime = doc.createElement("startTime");
-			startTime.appendChild(doc.createTextNode(event.getStartTime()));
-			eventHeader.appendChild(startTime);
-
 			Element endDate = doc.createElement("endDate");
-			endDate.appendChild(doc.createTextNode(event.getEndDate()));
+			endDate.appendChild(doc.createTextNode(parseDateToString(event.getEndDate())));
 			eventHeader.appendChild(endDate);
-
-			Element endTime = doc.createElement("endTime");
-			endTime.appendChild(doc.createTextNode(event.getEndTime()));
-			eventHeader.appendChild(endTime);
 
 			if (event.getAlarmDateTime() != null) {
 				Element timerDateTime = doc.createElement("timerDateTime");
-				SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-				String alarmString = simpleDateFormat.format(event.getAlarmDateTime());
-				timerDateTime.appendChild(doc.createTextNode(alarmString));
+				timerDateTime.appendChild(doc.createTextNode(parseDateToString(event.getAlarmDateTime())));
 				eventHeader.appendChild(timerDateTime);
 			}
 
@@ -113,10 +101,8 @@ public class DataIO {
 
 			transformer.transform(source, result);
 
-		} catch (ParserConfigurationException pce) {
-			pce.printStackTrace();
-		} catch (TransformerException tfe) {
-			tfe.printStackTrace();
+		} catch (ParserConfigurationException | TransformerException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -161,7 +147,7 @@ public class DataIO {
 		try {
 			if (dataFile.exists()) {
 				String path = dataFile.getPath();
-				if (path != null) {
+				if (path != null && !path.isEmpty()) {
 					readFileContent = (ArrayList<String>) Files.readAllLines(Paths.get(path));
 				}
 			}
@@ -205,26 +191,16 @@ public class DataIO {
 			eventHeader.appendChild(location);
 
 			Element startDate = doc.createElement("startDate");
-			startDate.appendChild(doc.createTextNode(event.getStartDate()));
+			startDate.appendChild(doc.createTextNode(parseDateToString(event.getStartDate())));
 			eventHeader.appendChild(startDate);
 
-			Element startTime = doc.createElement("startTime");
-			startTime.appendChild(doc.createTextNode(event.getStartTime()));
-			eventHeader.appendChild(startTime);
-
 			Element endDate = doc.createElement("endDate");
-			endDate.appendChild(doc.createTextNode(event.getEndDate()));
+			endDate.appendChild(doc.createTextNode(parseDateToString(event.getEndDate())));
 			eventHeader.appendChild(endDate);
-
-			Element endTime = doc.createElement("endTime");
-			endTime.appendChild(doc.createTextNode(event.getEndTime()));
-			eventHeader.appendChild(endTime);
 
 			if (event.getAlarmDateTime() != null) {
 				Element timerDateTime = doc.createElement("timerDateTime");
-				SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-				String alarmString = simpleDateFormat.format(event.getAlarmDateTime());
-				timerDateTime.appendChild(doc.createTextNode(alarmString));
+				timerDateTime.appendChild(doc.createTextNode(parseDateToString(event.getAlarmDateTime())));
 				eventHeader.appendChild(timerDateTime);
 			}
 
@@ -236,11 +212,32 @@ public class DataIO {
 			StreamResult result = new StreamResult(dataFile);
 			transformer.transform(source, result);
 
-		} catch (ParserConfigurationException pce) {
+		} catch (ParserConfigurationException | TransformerException pce) {
 			pce.printStackTrace();
-		} catch (TransformerException tfe) {
-			tfe.printStackTrace();
 		}
 	}
 
+	public static String parseDateToString(Date date) {
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		String strDate = dateFormat.format(date);
+		return strDate;
+	}
+
+	public static String parseDateToStringDateOnly(Date date) {
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		String strDate = dateFormat.format(date);
+		return strDate;
+	}
+
+	public static String parseDateToStringTimeOnly(Date date) {
+		DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+		String strDate = dateFormat.format(date);
+		return strDate;
+	}
+
+	public static Date parseStringToDate(String date) throws ParseException {
+		DateFormat resultFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Date result = (Date) resultFormat.parse(date);
+		return result;
+	}
 }

@@ -4,7 +4,7 @@ public class AboutProgramWindow {
 	/**
 	 * 	Pole aboutProgramMessage zawierające treść wiadomości w oknie
 	 */
-	private String aboutProgramMessage = "";
+	private String aboutProgramMessage;
 	
 	/**
 	 * 	Metoda inicjująca okno About Program i wyznaczająca jego zawartość

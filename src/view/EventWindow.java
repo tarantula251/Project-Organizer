@@ -6,17 +6,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SpinnerDateModel;
-import javax.swing.text.DateFormatter;
-
 import com.toedter.calendar.JDateChooser;
-
 import controller.EventManager;
 import controller.exception.EventManagerException;
-import model.exception.EventEmptyFieldException;
-import model.exception.EventInvalidDateException;
-import model.exception.EventInvalidTimeException;
-import model.exception.TimerDateTimeException;
-
 import java.awt.Font;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
@@ -24,23 +16,18 @@ import java.awt.Insets;
 import javax.swing.JTextArea;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JButton;
 import javax.swing.JDialog;
-
 import java.awt.Color;
 import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.awt.event.ActionEvent;
 import javax.swing.JCheckBox;
 import java.awt.FlowLayout;
 import javax.swing.SwingConstants;
+import model.DataIO;
 
 public class EventWindow {
 
@@ -56,12 +43,8 @@ public class EventWindow {
 	public JTextArea descriptionArea;
 	private JButton btnCancel;
 	private JButton btnSubmit;
-	public JPanel startDatePanel;
 	public JPanel endDatePanel;
-	public JDateChooser chooserStart = new JDateChooser();
 	public JDateChooser chooser = new JDateChooser();
-	public SpinnerDateModel spinnerDateModel;
-	public JSpinner spinner;
 	private EventManager eventManager;
 	private JLabel lblStartTime;
 	private JLabel lblEndTime;
@@ -91,22 +74,8 @@ public class EventWindow {
 		this.chooser = chooser;
 	}
 
-	public JSpinner addTimeSpinner(JSpinner spinner, String timeFormat) {
-		spinner.setFont(new Font("Tahoma", Font.PLAIN, 11));
-		JSpinner.DateEditor editor = new JSpinner.DateEditor(spinner, timeFormat);
-		DateFormatter formatter = (DateFormatter) editor.getTextField().getFormatter();
-		formatter.setAllowsInvalid(false);
-		formatter.setOverwriteMode(true);
-		spinner.setEditor(editor);
-		return spinner;
-	}
-
 	public JDateChooser getStartDateField() {
 		return startDateField;
-	}
-
-	public void setStartDateField(JDateChooser startDateField) {
-		this.startDateField = startDateField;
 	}
 
 	/**
@@ -351,41 +320,55 @@ public class EventWindow {
 		panel.add(btnSubmit);
 		btnSubmit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String titleValue, descriptionValue, locationValue, startDateValue, endDateValue, startTimeValue,
-						endTimeValue;
+				String titleValue, descriptionValue, locationValue;
+				Date startDateValue, startTimeValue, startDate = null, endDateValue, endTimeValue, endDate = null, timerValue, alarmDateTimeValue = null;
+
 				titleValue = titleField.getText();
 				descriptionValue = descriptionArea.getText();
 				locationValue = locationField.getText();
-				DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-				startDateValue = dateFormat.format(startDateField.getDate());
-				Date fetchedDate = ((JDateChooser) endDatePanel.getComponent(0)).getDate();
-				endDateValue = dateFormat.format(fetchedDate);
-				Date valueStart = (Date) ((JSpinner) startTimePanel.getComponent(0)).getValue();
-				SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
-				startTimeValue = format.format(valueStart);
-				Date valueEnd = (Date) ((JSpinner) endTimePanel.getComponent(0)).getValue();
-				endTimeValue = format.format(valueEnd);
-				Date timerValue = (Date) ((JSpinner) timerPanel.getComponent(0)).getValue();
-				Date alarmDateTimeValue = null;
+
+				startDateValue = startDateField.getDate();
+				String startDateTemp = DataIO.parseDateToStringDateOnly(startDateValue);
+
+				startTimeValue = (Date) ((JSpinner) startTimePanel.getComponent(0)).getValue();
+				String startTimeTemp = DataIO.parseDateToStringTimeOnly(startTimeValue);
+
+				String startTemp = startDateTemp + " " + startTimeTemp;
+
+				try {
+					startDate = DataIO.parseStringToDate(startTemp);
+				} catch (ParseException e2) {
+					showErrorPane(e2.getMessage());
+				}
+
+				endDateValue = ((JDateChooser) endDatePanel.getComponent(0)).getDate();
+				String endDateTemp = DataIO.parseDateToStringDateOnly(endDateValue);
+
+				endTimeValue = (Date) ((JSpinner) endTimePanel.getComponent(0)).getValue();
+				String endTimeTemp = DataIO.parseDateToStringTimeOnly(endTimeValue);
+
+				String endTemp = endDateTemp + " " + endTimeTemp;
+
+				try {
+					endDate = DataIO.parseStringToDate(endTemp);
+				} catch (ParseException e2) {
+					showErrorPane(e2.getMessage());
+				}
+
+				timerValue = (Date) ((JSpinner) timerPanel.getComponent(0)).getValue();
 
 				if (chckbxSetAlarm.isSelected())
 					try {
-						alarmDateTimeValue = eventManager.setAlarmGoOffDate(timerValue, valueStart, startDateValue);
+						alarmDateTimeValue = eventManager.setAlarmGoOffDate(timerValue, startDate);
 					} catch (ParseException e2) {
-						// TODO Auto-generated catch block
 						e2.printStackTrace();
 					}
 				try {
-					eventManager.addEvent(titleValue, descriptionValue, locationValue, startDateValue, endDateValue,
-							startTimeValue, endTimeValue, alarmDateTimeValue);
+					eventManager.addEvent(titleValue, descriptionValue, locationValue, startDate, endDate, alarmDateTimeValue);
 					showPane("Success", "Event created successfully");
 					frmEventCreator.dispose();
 				} catch (EventManagerException ex) {
 					showErrorPane(ex.getMessage());
-				} catch (EventInvalidDateException e1) {
-					showErrorPane(e1.getMessage());
-				} catch (EventEmptyFieldException e1) {
-					showErrorPane(e1.getMessage());
 				}
 				dialogResult = 1;
 			}
@@ -412,7 +395,7 @@ public class EventWindow {
 
 	}
 
-	public void showPane(String title, String infoMessage) {
+	private void showPane(String title, String infoMessage) {
 		JOptionPane.showMessageDialog(null, infoMessage, title, JOptionPane.INFORMATION_MESSAGE);
 
 	}
