@@ -7,8 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import java.sql.SQLException;
-import java.text.DateFormat;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -114,6 +112,7 @@ public class EventManager {
 													+ "\n");
 									clip.stop();
 									event.setAlarmDateTime(null);
+									dataIo.updateEventInDatabase(event);
 									createDirectory(directory);
 									sendDataToXml(event, directory + "/" + eventsFilename);
 								}
@@ -124,6 +123,10 @@ public class EventManager {
 
 					} catch (InterruptedException | TimerDateTimeException | EventInvalidTimeException | SAXException
 							| IOException e) {
+						e.printStackTrace();
+					} catch (SQLException e) {
+						// TODO Auto-generated catch block
+						System.out.println(e.getMessage());
 						e.printStackTrace();
 					}
 				}
@@ -211,8 +214,9 @@ public class EventManager {
 			Event event = new Event(titleValue, descriptionValue, locationValue, startDateValue, endDateValue, alarmDateTimeValue);
 			eventCollection.add(event);
 			eventCollection.sort(null);
-			createDirectory(directory);
-			sendDataToXml(event, directory + "/" + eventsFilename);
+			int id = dataIo.insertEventToDatabase(event);
+			if(id == 0) throw new EventManagerException("Invalid ID returned from database.");
+			event.setIndex(id);
 
 		} catch (EventEmptyFieldException eventEmptyFieldException) {
 			throw new controller.exception.EventManagerException("Invalid values in fields, please correct");
@@ -227,18 +231,13 @@ public class EventManager {
 	 * @throws EventManagerException - wyjątek zostaje rzucony, gdy podany zostanie błędny parametr
 	 * @throws SAXException - wyjątek zostaje rzucony, gdy nastąpi błąd parsowania pliku XML   
 	 * @throws IOException - wyjątek zostaje rzucony, gdy nastąpi błąd związany z otwarciem pliku do zapisu
+	 * @throws SQLException 
 	 */
-	public void removeEvent(int eventId) throws EventManagerException, SAXException, IOException {
+	public void removeEvent(int eventId) throws EventManagerException, SAXException, IOException, SQLException {
 		for (Event event : eventCollection) {
 			if (event.getIndex() == eventId) {
+				dataIo.deleteEventFromDatabase(event);
 				eventCollection.remove(event);
-				if (!eventCollection.isEmpty())
-					sendDataToXml(eventCollection.get(0), directory + "/" + eventsFilename);
-				else {
-					Files.deleteIfExists(Paths.get(directory + "/" + eventsFilename));
-					Files.deleteIfExists(Paths.get(directory));
-				}
-
 				return;
 			}
 		}
@@ -301,14 +300,18 @@ public class EventManager {
 
 		GregorianCalendar calendarStop = new GregorianCalendar(year, month, day, startHour - timerHour,
 				startMinute - timerMinute, 0);
-		String resultString = DataIO.parseDateToString(calendarStop.getTime());
-
-		return DataIO.parseStringToDate(resultString);
+		return calendarStop.getTime();
 	}
 	
 	public void importEventsFromDatabase()
 	{
-		
+		try {
+			eventCollection = dataIo.getEventsFromDatabase();
+		} catch (SQLException e) {
+		    System.out.println("SQLException: " + e.getMessage());
+		    System.out.println("SQLState: " + e.getSQLState());
+		    System.out.println("VendorError: " + e.getErrorCode());
+		}
 	}
 
 	/**
@@ -360,7 +363,7 @@ public class EventManager {
 
 	public void filterEventsTable(JTable table, String field) {
 		DefaultTableModel model = (DefaultTableModel) table.getModel();
-		TableRowSorter<DefaultTableModel> sorter = new TableRowSorter(model);
+		TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<DefaultTableModel>(model);
 		table.setRowSorter(sorter);
 		sorter.setRowFilter(RowFilter.regexFilter(field));
 	}

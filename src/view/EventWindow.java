@@ -27,6 +27,8 @@ import java.awt.event.ActionEvent;
 import javax.swing.JCheckBox;
 import java.awt.FlowLayout;
 import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableModel;
+
 import model.DataIO;
 
 public class EventWindow {
@@ -278,7 +280,7 @@ public class EventWindow {
 		frmEventCreator.getContentPane().add(lblAlarmWillGo, gbc_lblAlarmWillGo);
 
 		timerPanel = new JPanel();
-		JSpinner spinnerTimer = new JSpinner(new SpinnerDateModel());
+		JSpinner spinnerTimer = new JSpinner(new SpinnerDateModel(new Date(1561048814970L), null, null, Calendar.MINUTE));
 		spinnerTimer.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		// set default value
 		Calendar cal = Calendar.getInstance();
@@ -287,6 +289,7 @@ public class EventWindow {
 		Date date = cal.getTime();
 		spinnerTimer.setValue(date);
 		spinnerTimer.setEditor(new JSpinner.DateEditor(spinnerTimer, "HH:mm"));
+		
 		timerPanel.add(spinnerTimer);
 		GridBagConstraints gbc_timerPanel = new GridBagConstraints();
 		gbc_timerPanel.fill = GridBagConstraints.HORIZONTAL;

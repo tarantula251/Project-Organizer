@@ -8,6 +8,7 @@ import java.awt.event.KeyListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -192,7 +193,6 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		panelButtons.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
 
 		createEventBtn = new JButton("Create event");
-		createEventBtn.setMnemonic(KeyEvent.VK_C);
 		panelButtons.add(createEventBtn);
 		createEventBtn.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		deleteEventBtn.addActionListener(this);
@@ -388,7 +388,7 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 					try {
 						eventManager.removeEvent(eventId);
 						refreshEventsTable();
-					} catch (EventManagerException | SAXException | IOException e1) {
+					} catch (EventManagerException | SAXException | IOException | SQLException e1) {
 						JOptionPane.showMessageDialog(null, e1.getMessage(), "Delete event", JOptionPane.ERROR_MESSAGE);
 						e1.printStackTrace();
 					}

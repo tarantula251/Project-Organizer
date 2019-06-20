@@ -8,13 +8,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import java.util.Dictionary;
-import java.util.Enumeration;
 import java.util.HashMap;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -28,15 +27,22 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
+import model.exception.EventEmptyFieldException;
+import model.exception.EventInvalidDateException;
+import model.exception.EventInvalidTimeException;
+import model.exception.TimerDateTimeException;
 
 public class DataIO {
 	
@@ -63,7 +69,7 @@ public class DataIO {
 	
 	public void connectToDatabase(String server, String database, String user, String password) throws SQLException
 	{
-		String url = "jdbc:mysql://"+server+"/"+database+"?serverTimezone=UTC";
+		String url = "jdbc:mysql://"+server+"/"+database;
 		dataBaseConnecion = DriverManager.getConnection(url, user, password);
 	}
 	
@@ -147,7 +153,7 @@ public class DataIO {
 
 	public ArrayList<Event> getEventsFromDatabase() throws SQLException
 	{
-		if(dataBaseConnecion != null) throw new SQLException("No database connected");
+		if(dataBaseConnecion == null) throw new SQLException("No database connected");
 		Statement statement = dataBaseConnecion.createStatement();
 		ResultSet result = statement.executeQuery("SELECT * FROM events");
 		
@@ -159,13 +165,65 @@ public class DataIO {
 			String title = result.getString("title");
 			String location = result.getString("location");
 			String description = result.getString("description");
-			Date start = result.getDate("start");
-			Date end = result.getDate("end");
+			Date start = new Date(result.getTimestamp("start").getTime());
+			Date end = new Date(result.getTimestamp("end").getTime());
+			Date notification = null;
+			Timestamp notificationTimestamp = result.getTimestamp("notification");
+			if(notificationTimestamp != null) notification = new Date(result.getTimestamp("notification").getTime()); 
+			try {
+				Event event = new Event(title, description, location, start, end, notification);
+				event.setIndex(id);
+				events.add(event);
+			} catch (EventEmptyFieldException | EventInvalidDateException | EventInvalidTimeException | TimerDateTimeException e) {
+				System.out.println(e.getMessage());
+				continue;
+			}
 		}
 		
 		result.close();
 		statement.close();
 		return events;
+	}
+	
+	private void prepareEventStatement(Event event, PreparedStatement statement) throws SQLException
+	{
+		statement.setString(1, event.getTitle());
+		statement.setString(2, event.getLocation());
+		statement.setString(3, event.getDescription());
+		statement.setTimestamp(4, new Timestamp(event.getStartDate().getTime()));
+		statement.setTimestamp(5, new Timestamp(event.getEndDate().getTime()));
+		
+		Timestamp notification = null;
+		if(event.getAlarmDateTime() != null) notification = new Timestamp(event.getAlarmDateTime().getTime());
+		statement.setTimestamp(6, notification);
+	}
+	
+	public int insertEventToDatabase(Event event) throws SQLException
+	{
+		if(dataBaseConnecion == null) throw new SQLException("No database connected");
+		PreparedStatement statement = dataBaseConnecion.prepareStatement("INSERT INTO events VALUES (null, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+		prepareEventStatement(event, statement);
+		statement.executeUpdate();
+		ResultSet generatedKey = statement.getGeneratedKeys();
+		if(generatedKey.next()) return generatedKey.getInt(1);
+		return 0;
+	}
+	
+	public void updateEventInDatabase(Event event) throws SQLException
+	{
+		if(dataBaseConnecion == null) throw new SQLException("No database connected");
+		PreparedStatement statement = dataBaseConnecion.prepareStatement("UPDATE events SET title = ?, location = ?, description = ?, start = ?, end = ?, notification = ? WHERE id = ?");
+		prepareEventStatement(event, statement);
+		statement.setInt(7, event.getIndex());
+		statement.executeUpdate();
+	}
+	
+	public void deleteEventFromDatabase(Event event) throws SQLException
+	{
+		if(dataBaseConnecion == null) throw new SQLException("No database connected");
+		PreparedStatement statement = dataBaseConnecion.prepareStatement("DELETE FROM events WHERE id = ?");
+		statement.setInt(1, event.getIndex());
+		statement.executeUpdate();
 	}
 	
 	/**

@@ -11,10 +11,6 @@ import model.exception.TimerDateTimeException;
 
 public class Event implements Comparable<Event> {
 	/**
-	 * 	Pole counter autoinkrementujące wartość pola index
-	 */
-	private static int counter = 0; 
-	/**
 	 * 	Pole title przechowujące tytuł Eventu
 	 */
 	private String title;
@@ -64,7 +60,7 @@ public class Event implements Comparable<Event> {
 		setStartDate(startDate);
 		setEndDate(endDate);
 		setAlarmDateTime(alarmDateTimeValue);		
-		index = ++counter;	
+		index = 0;
 	}
 
 	public void setIndex(Integer index) {
