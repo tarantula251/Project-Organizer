@@ -42,6 +42,8 @@ import view.EventWindow;
 import view.MainWindow;
 
 public class EventManager {
+	
+	private boolean databaseConnected = false;
 
 	HashMap<String, String> config = null;
 	/**
@@ -91,7 +93,6 @@ public class EventManager {
 
 		loadConfig();
 		if(connectToDatabase()) importEventsFromDatabase();
-	//	else importEventsFromXml();
 
 		clip = AudioSystem.getClip();
 		AudioInputStream inputStream = AudioSystem.getAudioInputStream(new File("resources/alarm.wav"));
@@ -165,16 +166,18 @@ public class EventManager {
 		
 		try {
 			dataIo.connectToDatabase(server, port, database, user, password);
-			return true;
+			databaseConnected = true;
 		} catch (SQLException e) {
-		    System.out.println("SQLException: " + e.getMessage());
-		    System.out.println("SQLState: " + e.getSQLState());
-		    System.out.println("VendorError: " + e.getErrorCode());
-			return false;
+		    databaseConnected = false;
 		}
 		
+		return databaseConnected;
 	}
 	
+	public boolean isDatabaseConnected() {
+		return databaseConnected;
+	}
+
 	public HashMap<String, String> getConfig() {
 		return config;
 	}
@@ -224,10 +227,10 @@ public class EventManager {
 			throws EventManagerException {
 		try {
 			Event event = new Event(titleValue, descriptionValue, locationValue, startDateValue, endDateValue, alarmDateTimeValue);
-			eventCollection.add(event);					
-			eventCollection.sort(null);
 			int id = dataIo.insertEventToDatabase(event);
 			if(id == 0) throw new EventManagerException("Invalid ID returned from database.");
+			eventCollection.add(event);					
+			eventCollection.sort(null);
 			event.setIndex(id);
 
 		} catch (EventEmptyFieldException eventEmptyFieldException) {

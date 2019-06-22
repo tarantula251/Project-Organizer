@@ -100,7 +100,9 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 	public MainWindow() throws Exception {
 		try {
 			eventManager = new EventManager(this);
-	//		initialize();
+			if(!eventManager.isDatabaseConnected()) JOptionPane.showMessageDialog(window,
+					"Connection to database could not be established. Creating new events is disabled.\nFor more details, please test your connection in Settings.",
+					"Database", JOptionPane.ERROR_MESSAGE);
 		} catch (LineUnavailableException e) {
 			JOptionPane.showMessageDialog(null, e.getMessage(), "LineUnavailableException", JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();
@@ -155,6 +157,7 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		window.setLocationRelativeTo(null);
 		window.setVisible(true);
 		refreshEventsTable();
+		enableEventCreation(eventManager.isDatabaseConnected());
 	}
 
 	/**
@@ -287,7 +290,7 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 			@Override
 			public void keyReleased(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_DELETE)
-					removeSelectedEvent();
+					if(eventManager.isDatabaseConnected()) removeSelectedEvent();
 			}
 		});
 		table.setModel(new DefaultTableModel(new Object[][] {}, new String[] { "Id", "Title", "Start date" }) {
@@ -438,9 +441,10 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 					refreshEventsTable();
 				} else {
 					JOptionPane.showMessageDialog(window,
-							"Connection to database could not be established. Backup XML file will be used.",
+							"Connection to database could not be established. Creating new events is disabled.\nFor more details, please test your connection in Settings.",
 							"Database", JOptionPane.ERROR_MESSAGE);
 				}
+				enableEventCreation(eventManager.isDatabaseConnected());
 			}
 		}
 
@@ -548,6 +552,13 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 				}
 			}
 		}
+	}
+	
+	public void enableEventCreation(boolean enabled)
+	{
+		createEventBtn.setEnabled(enabled);
+		deleteEventBtn.setEnabled(enabled);
+		gImport.setEnabled(enabled);
 	}
 
 	public void showInformationMessageDialog(String title, String infoMessage) {
