@@ -39,7 +39,8 @@ public class SettingsDialog extends JDialog {
 	private int dialogResult = 0;
 
 	/**
-	 * Create the dialog.
+	 * Konstruktor klasy SettingsDialog tworzy okno dialogowe, służące do podania danych konfiguracyjnych
+	 * @param window - obiekt łączący SettingsDialog z MainWindow, zapewniający dostęp do warstwy logiki
 	 */
 	public SettingsDialog(MainWindow window) {
 		super(window.getWindow(), "Settings", true);

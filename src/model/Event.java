@@ -23,20 +23,19 @@ public class Event implements Comparable<Event> {
 	 */
 	private String location;
 	/**
-	 * 	Pole startDate przechowujące datę początku Eventu
+	 * 	Pole startDate przechowujące datę i godzinę początku Eventu
 	 */
 	private Date startDate;
 	/**
-	 * 	Pole endDate przechowujące datę końca Eventu
+	 * 	Pole endDate przechowujące datę i godzinę końca Eventu
 	 */
 	private Date endDate;
-
 	/**
 	 * 	Pole index przechowujące ID Eventu
 	 */
 	private Integer index;
 	/**
-	 * 	Pole alarmDateTime przechowujące datę oraz czas, w którym uruchomi się alarm dla Eventu
+	 * 	Pole alarmDateTime przechowujące datę i godzinę, w którym uruchomi się alarm dla Eventu
 	 */
 	private Date alarmDateTime;
 
@@ -82,6 +81,11 @@ public class Event implements Comparable<Event> {
 		this.alarmDateTime = alarmDateTime;
 	}
 
+	/**
+	 * 	Metoda sprawdza, czy format podanego parametru jest poprawny
+	 * @param time - zmienna typu Date, której format jest sprawdzany
+	 * @throws EventInvalidTimeException - wyjątek zostaje rzucony, gdy format podanego parametru jest niezgodny ze wzorcem
+	 */
 	private void validateTime(Date time) throws EventInvalidTimeException {
 		try {
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");

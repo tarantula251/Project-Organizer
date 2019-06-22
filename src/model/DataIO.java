@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -54,9 +53,16 @@ import model.exception.EventInvalidTimeException;
 import model.exception.TimerDateTimeException;
 
 public class DataIO {
-	
+	/**
+	 * 	Pole dataBaseConnecion będące instancją połączenia z bazą danych
+	 */
 	Connection dataBaseConnecion = null;
 	
+	/**
+	 * 	Metoda odczytuje plik konfiguracyjny zawierający dane niezbędne do skonfigurowania połączenia z bazą danych
+	 * @return config - mapa zawierające odczytane dane konfiguracyjne
+	 * @throws IOException - wyjątek zostanie rzucony, gdy wystąpi bład przy odczytywaniu zawartości pliku
+	 */
 	public HashMap<String, String> loadConfig() throws IOException
 	{
 		HashMap<String, String> config = new HashMap<String, String>();
@@ -75,6 +81,11 @@ public class DataIO {
 		return config;
 	}
 	
+	/**
+	 * 	Metoda tworzy oraz zapisuje dane do pliku konfiguracyjnego, wykorzystywanego przy inicjowaniu połączenia z bazą danych
+	 * @param config - mapa przechowująca dane konfiguracyjne
+	 * @throws IOException - wyjątek zostanie rzucony, gdy wystąpi bład przy zapisie danych do pliku
+	 */
 	public void saveConfig(HashMap<String, String> config) throws IOException
 	{
 		File configFile = new File("config.cfg");
@@ -87,6 +98,15 @@ public class DataIO {
 		configFileWriter.close();
 	}
 	
+	/**
+	 * 	Metoda inicjuje połączenie aplikacji z zewnętrzną bazą danych
+	 * @param server - nazwa serwera przechowującego bazę danych
+	 * @param port - nazwa portu, poprzez który realizowane jest połączenie z bazą danych
+	 * @param database - nazwa bazy danych
+	 * @param user - nazwa użytkownika inicjującego połączenie
+	 * @param password - hasło przypisane do użytkownika
+	 * @throws SQLException - wyjątek zostanie rzucony, gdy wystąpi bład przy inicjowaniu połączenia z bazą danych
+	 */
 	public void connectToDatabase(String server, String port, String database, String user, String password) throws SQLException
 	{
 		String url = "jdbc:mysql://"+server+":"+port+"/"+database;
@@ -94,7 +114,7 @@ public class DataIO {
 	}
 	
 	/**
-	 * 	Pole dataFile przechowujące instancję pliku z bazą danych.
+	 * 	Pole dataFile przechowujące instancję pliku z bazą danych
 	 */
 	private File dataFile;
 
@@ -103,12 +123,12 @@ public class DataIO {
 	}
 
 	/**
-	 * 	Konstruktor tworzy obiekt klasy DataIO, odpowiedzialnej za odczyt oraz zapis danych do bazy danych.
+	 * 	Konstruktor tworzy obiekt klasy DataIO, odpowiedzialnej za odczyt oraz zapis danych do bazy danych oraz zewnętrznych plików
 	 */
 	public DataIO() {}
 
 	/**
-	 * Metoda tworzy nowy plik będący bazą danych oraz zapisuje do niego dane nowo utworzonego Eventu.                       
+	 * Metoda tworzy nowy plik XML oraz zapisuje do niego dane wybranego Eventu                       
 	 * @param event - obiekt Event, którego dane zostaną zapisane do pliku
 	 * @param filename - nazwa pliku, do którego nastąpi zapis     
 	 */
@@ -171,6 +191,11 @@ public class DataIO {
 		}
 	}
 
+	/**
+	 * Metoda pobiera z bazy dane dotyczące Eventów oraz tworzy na ich podstawie obiekty typu Event, które zapisuje do kolekcji
+	 * @return events - kolekcja wypełniona Eventami
+	 * @throws SQLException - wyjątek zostanie rzucony, gdy wystąpi błąd związany z dostępem do bazy danych
+	 */
 	public ArrayList<Event> getEventsFromDatabase() throws SQLException
 	{
 		if(dataBaseConnecion == null) throw new SQLException("No database connected");
@@ -205,6 +230,12 @@ public class DataIO {
 		return events;
 	}
 	
+	/**
+	 * Metoda tworzy strukturę tabeli w bazie danych przechowującej dane o Eventach
+	 * @param event - obiekt typu Event, którego dane zostaną umieszczone w tabeli
+	 * @param statement - polecenie dla bazy danych
+	 * @throws SQLException - wyjątek zostanie rzucony, gdy wystąpi błąd związany z dostępem do bazy danych
+	 */
 	private void prepareEventStatement(Event event, PreparedStatement statement) throws SQLException
 	{
 		statement.setString(1, event.getTitle());
@@ -218,7 +249,13 @@ public class DataIO {
 		statement.setTimestamp(6, notification);
 	}
 	
-	public int insertEventToDatabase(Event event) throws SQLException, IOException
+	/**
+	 * Metoda wstawia do bazy danych informacje o konkretnym Evencie
+	 * @param event - obiekt typu Event, którego dane zostaną umieszczone w bazie
+	 * @return int - wartość typu int reprezentująca ID Eventu w bazie danych
+	 * @throws SQLException - wyjątek zostanie rzucony, gdy wystąpi błąd związany z dostępem do bazy danych
+	 */
+	public int insertEventToDatabase(Event event) throws SQLException
 	{		
 		if(dataBaseConnecion == null) throw new SQLException("No database connected");
 		PreparedStatement statement = dataBaseConnecion.prepareStatement("INSERT INTO events VALUES (null, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
@@ -229,6 +266,11 @@ public class DataIO {
 		return 0;
 	}
 	
+	/**
+	 * Metoda aktualizuje dane o konkretnym Evencie w bazie danych
+	 * @param event - obiekt typu Event, którego dane zostaną zaktualizowane w bazie
+	 * @throws SQLException - wyjątek zostanie rzucony, gdy wystąpi błąd związany z dostępem do bazy danych
+	 */
 	public void updateEventInDatabase(Event event) throws SQLException
 	{
 		if(dataBaseConnecion == null) throw new SQLException("No database connected");
@@ -238,6 +280,11 @@ public class DataIO {
 		statement.executeUpdate();
 	}
 	
+	/**
+	 * Metoda usuwa dane o konkretnym Evencie z bazy danych
+	 * @param event - obiekt typu Event, którego dane zostaną usunięte z bazy
+	 * @throws SQLException - wyjątek zostanie rzucony, gdy wystąpi błąd związany z dostępem do bazy danych
+	 */
 	public void deleteEventFromDatabase(Event event) throws SQLException
 	{
 		if(dataBaseConnecion == null) throw new SQLException("No database connected");
@@ -247,8 +294,9 @@ public class DataIO {
 	}
 	
 	/**
-	 * Metoda pobiera listę węzłów z pliku XML, w którym przechowywane są dane o Eventach                  
-	 * @return NodeList - obiekt przechowujący listę węzłów zawierających dane o Eventach
+	 * Metoda pobiera listę węzłów z pliku XML, w którym przechowywane są dane o Eventach       
+	 * @param filename - nazwa pliku XML, z którego pobierana jest lista węzłów           
+	 * @return nList - obiekt typu NodeList przechowujący listę węzłów zawierających dane o Eventach w pliku XML
 	 */
 	public NodeList getNodeListFromXml(String filename) {
 		NodeList nList = null;
@@ -265,93 +313,31 @@ public class DataIO {
 		}
 		return nList;
 	}
-
-	/**
-	 * Metoda odczytuje zawartość pliku XML z danymi o Eventach i zapisuje je do listy.                
-	 * @return ArrayList - obiekt przechowujący odczytaną zawartość pliku XML
-	 * @throws IOException - wyjątek zostaje rzucony, gdy nastąpi problem z otwarciem pliku
-	 */
-	public ArrayList<String> readXml() throws IOException {
-
-		ArrayList<String> readFileContent = new ArrayList<String>();
-		try {
-			if (dataFile.exists()) {
-				String path = dataFile.getPath();
-				if (path != null && !path.isEmpty()) {
-					readFileContent = (ArrayList<String>) Files.readAllLines(Paths.get(path));
-				}
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return readFileContent;
-	}
-
-	/**
-	 * Metoda dopisuje do istniejącego pliku XML dane o nowo utworzonym Evencie.
-	 * @param event - obiekt Event, którego dane zostaną zapisane do pliku
-	 * @throws SAXException - wyjątek zostaje rzucony, gdy nastąpi błąd parsowania pliku XML          
-	 * @throws IOException - wyjątek zostaje rzucony, gdy nastąpi problem z otwarciem pliku
-	 */
-	public void appendXml(Event event) throws SAXException, IOException {
-
-		try {
-			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-			Document doc = docBuilder.parse(dataFile);
-			Element rootElement = doc.getDocumentElement();
-
-			Element eventHeader = doc.createElement("Event");
-			rootElement.appendChild(eventHeader);
-
-			Attr attr = doc.createAttribute("id");
-			attr.setValue(Integer.toString(event.getIndex()));
-			eventHeader.setAttributeNode(attr);
-
-			Element title = doc.createElement("title");
-			title.appendChild(doc.createTextNode(event.getTitle()));
-			eventHeader.appendChild(title);
-
-			Element description = doc.createElement("description");
-			description.appendChild(doc.createTextNode(event.getDescription()));
-			eventHeader.appendChild(description);
-
-			Element location = doc.createElement("location");
-			location.appendChild(doc.createTextNode(event.getLocation()));
-			eventHeader.appendChild(location);
-
-			Element startDate = doc.createElement("startDate");
-			startDate.appendChild(doc.createTextNode(parseDateToString(event.getStartDate())));
-			eventHeader.appendChild(startDate);
-
-			Element endDate = doc.createElement("endDate");
-			endDate.appendChild(doc.createTextNode(parseDateToString(event.getEndDate())));
-			eventHeader.appendChild(endDate);
-
-			if (event.getAlarmDateTime() != null) {
-				Element timerDateTime = doc.createElement("timerDateTime");
-				timerDateTime.appendChild(doc.createTextNode(parseDateToString(event.getAlarmDateTime())));
-				eventHeader.appendChild(timerDateTime);
-			}
-
-			TransformerFactory transformerFactory = TransformerFactory.newInstance();
-			Transformer transformer = transformerFactory.newTransformer();
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-
-			DOMSource source = new DOMSource(doc);
-			StreamResult result = new StreamResult(dataFile);
-			transformer.transform(source, result);
-
-		} catch (ParserConfigurationException | TransformerException pce) {
-		}
-	}
 	
+	/**
+	 * Metoda testuje poprawność połączenia z bazą danych
+	 * @param server - nazwa serwera przechowującego bazę danych
+	 * @param port - nazwa portu, poprzez który realizowane jest połączenie z bazą danych
+	 * @param database - nazwa bazy danych
+	 * @param user - nazwa użytkownika inicjującego połączenie
+	 * @param password - hasło przypisane do użytkownika
+	 * @return Connection - obiekt będący instancją połączenia z bazą danych
+	 * @throws SQLException - wyjątek zostanie rzucony, gdy wystąpi błąd związany z dostępem do bazy danych
+	 */
 	public static Connection testConnectionToDatabase(String server, String port, String database, String user, String password) throws SQLException
 	{
 		String url = "jdbc:mysql://"+server+":"+port+"/"+database;
 		return DriverManager.getConnection(url, user, password);
 	}
 
+	/**
+	 * Metoda zapisuje dane o konkretnym Evencie do pliku w formacie iCalendar
+	 * @param event - obiekt typu Event, którego dane zostaną zapisane do pliku
+	 * @param filename - nazwa pliku, do którego zostaną zapisane dane
+	 * @throws IOException - wyjątek zostanie rzucony, gdy wystąpi błąd związany z utworzeniem pliku
+	 * @throws ValidationException - wyjątek zostanie rzucony, gdy wystąpi błąd związany z walidacją danych
+	 * @throws ParseException - wyjątek zostanie rzucony, gdy wystąpi błąd związany z parsowaniem daty
+	 */
 	public void saveICalendar(Event event, String filename) throws IOException, ValidationException, ParseException {
 
 		Calendar iCal = new Calendar();

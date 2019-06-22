@@ -59,8 +59,6 @@ import javax.swing.table.DefaultTableModel;
 import com.toedter.calendar.JCalendar;
 import javax.swing.JSplitPane;
 import java.awt.event.KeyAdapter;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
 import javax.swing.ListSelectionModel;
 
 public class MainWindow implements MenuListener, ActionListener, KeyListener {
@@ -91,11 +89,8 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 	private JMenuItem gImport;
 
 	/**
-	 * Konstruktor tworzy obiekt klasy MainWindow, który jest głównym oknem
-	 * aplikacji.
-	 * 
-	 * @throws Exception - wyjątek zostaje rzucony, gdy którykolwiek z użytych
-	 *                   komponentów rzuci wyjątek
+	 * Konstruktor tworzy obiekt klasy MainWindow, który jest głównym oknem aplikacji
+	 * @throws Exception - wyjątek zostaje rzucony, gdy którykolwiek z użytych komponentów rzuci wyjątek
 	 */
 	public MainWindow() throws Exception {
 		try {
@@ -116,28 +111,8 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 					JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();
 			throw new Exception();
-		} catch (ParseException e) {
-			JOptionPane.showMessageDialog(null, e.getMessage(), "ParseException", JOptionPane.ERROR_MESSAGE);
-			e.printStackTrace();
-			throw new Exception();
-		} catch (EventEmptyFieldException e) {
-			JOptionPane.showMessageDialog(null, e.getMessage(), "EventEmptyFieldException", JOptionPane.ERROR_MESSAGE);
-			e.printStackTrace();
-			throw new Exception();
-		} catch (EventInvalidDateException e) {
-			JOptionPane.showMessageDialog(null, e.getMessage(), "EventInvalidDateException", JOptionPane.ERROR_MESSAGE);
-			e.printStackTrace();
-			throw new Exception();
-		} catch (EventInvalidTimeException e) {
-			JOptionPane.showMessageDialog(null, e.getMessage(), "EventInvalidTimeException", JOptionPane.ERROR_MESSAGE);
-			e.printStackTrace();
-			throw new Exception();
 		} catch (EventManagerException e) {
 			JOptionPane.showMessageDialog(null, e.getMessage(), "EventManagerException", JOptionPane.ERROR_MESSAGE);
-			e.printStackTrace();
-			throw new Exception();
-		} catch (TimerDateTimeException e) {
-			JOptionPane.showMessageDialog(null, e.getMessage(), "TimerDateTimeException", JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();
 			throw new Exception();
 		} catch (Exception e) {
@@ -161,8 +136,7 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 	}
 
 	/**
-	 * Metoda odświeża wygląd tabeli z Eventami, gdy kolekcja Eventów jest
-	 * aktualizowana
+	 * Metoda odświeża wygląd tabeli z Eventami, gdy kolekcja Eventów jest aktualizowana
 	 */
 	private void refreshEventsTable() {
 		var model = (DefaultTableModel) table.getModel();
@@ -531,13 +505,16 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 				eventManager.importEventsFromXml(importFilename);
 				refreshEventsTable();						
 			} catch (ParseException | EventEmptyFieldException | EventInvalidDateException | EventInvalidTimeException
-					| TimerDateTimeException | SQLException | IOException e1) {
+					| TimerDateTimeException | SQLException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}			
 		}
 	}
-
+	
+	/**
+	 * Metoda odpowiedzialna za usuwanie wybranego Eventu z tabeli
+	 */
 	public void removeSelectedEvent() {
 		if (table.getSelectedRowCount() > 0) {
 			int eventId = (Integer) table.getValueAt(table.getSelectedRow(), 0);
@@ -546,7 +523,7 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 				try {
 					eventManager.removeEvent(eventId);
 					refreshEventsTable();
-				} catch (EventManagerException | SAXException | IOException | SQLException e1) {
+				} catch (EventManagerException | SQLException e1) {
 					JOptionPane.showMessageDialog(null, e1.getMessage(), "Delete event", JOptionPane.ERROR_MESSAGE);
 					e1.printStackTrace();
 				}

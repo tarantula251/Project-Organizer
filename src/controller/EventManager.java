@@ -42,53 +42,41 @@ import view.EventWindow;
 import view.MainWindow;
 
 public class EventManager {
-	
+	/**
+	 * 	Pole databaseConnected będące flagą połączenia z bazą danych
+	 */
 	private boolean databaseConnected = false;
-
+	/**
+	 * 	Pole config przechowujące dane konfiguracyjne połączenia z bazą danych
+	 */
 	HashMap<String, String> config = null;
 	/**
-	 * 	Pole eventCollection przechowujÄ…ce kolekcjÄ™ wszystkich EventÃ³w w liÅ›cie
+	 * 	Pole eventCollection przechowujące kolekcję wszystkich Eventów w liście
 	 */
 	private ArrayList<Event> eventCollection = new ArrayList<Event>();
 	/**
-	 * 	Pole mainWindow Å‚Ä…czÄ…ce wartstwÄ™ logiki z warstwÄ… widoku
+	 * 	Pole mainWindow łączące warstwę logiki z warstwą widoku
 	 */
 	private MainWindow mainWindow;
 	/**
-	 * 	Pole dataIo Å‚Ä…czÄ…ce wartstwÄ™ logiki z warstwÄ… danych
+	 * 	Pole dataIo łączące warstwę logiki z warstwą danych
 	 */
 	private DataIO dataIo = new DataIO();
 	/**
-	 * 	Pole directory okreÅ›lajÄ…ce folder zawierajÄ…cy bazÄ™ danych
-	 */
-	private String directory = "databank";
-	
-	/**
-	 * 	Pole eventsFilename okreÅ›lajÄ…ce nazwÄ™ pliku XML z danymi
-	 */
-	private String eventsFilename = "data.xml";
-	/**
-	 * 	Pole clip niezbÄ™dne do uruchomienia pliku dÅºwiÄ™kowego dla alarmu
+	 * 	Pole clip niezbędne do uruchomienia pliku dźwiękowego dla alarmu
 	 */
 	private Clip clip;
 
 	/**
-	 * 	Konstruktor tworzy obiekt klasy EventManager, ktÃ³ry odpowiedzialny jest za zarzÄ…dzanie Eventami oraz  przekazywanie danych o nich do innych warstw aplikacji
-	 * @param mainWindow - obiekt reprezentujÄ…cy gÅ‚Ã³wne okno aplikacji
-	 * @throws LineUnavailableException - wyjÄ…tek zostaje rzucony, gdy nastÄ…pi bÅ‚Ä…d zwiÄ…zany z uruchomieniem pliku dÅºwiÄ™kowego
-	 * @throws IOException - wyjÄ…tek zostaje rzucony, gdy nastÄ…pi bÅ‚Ä…d zwiÄ…zany z otwarciem pliku dÅºwiÄ™kowego
-	 * @throws UnsupportedAudioFileException - wyjÄ…tek zostaje rzucony, gdy nastÄ…pi bÅ‚Ä…d zwiÄ…zany z otwarciem pliku dÅºwiÄ™kowego
-	 * @throws ParseException - wyjÄ…tek zostaje rzucony, gdy nastÄ…pi bÅ‚Ä…d zwiÄ…zany z zaimportowaniem EventÃ³w z bazy XML
-	 * @throws EventEmptyFieldException - wyjÄ…tek zostaje rzucony, gdy nastÄ…pi bÅ‚Ä…d zwiÄ…zany z utworzeniem EventÃ³w z zaimportowanego pliku XML
-	 * @throws EventInvalidDateException - wyjÄ…tek zostaje rzucony, gdy nastÄ…pi bÅ‚Ä…d zwiÄ…zany z utworzeniem EventÃ³w z zaimportowanego pliku XML
-	 * @throws EventInvalidTimeException - wyjÄ…tek zostaje rzucony, gdy nastÄ…pi bÅ‚Ä…d zwiÄ…zany z utworzeniem EventÃ³w z zaimportowanego pliku XML
-	 * @throws TimerDateTimeException - wyjÄ…tek zostaje rzucony, gdy nastÄ…pi bÅ‚Ä…d zwiÄ…zany z utworzeniem EventÃ³w z zaimportowanego pliku XML
-	 * @throws EventManagerException - wyjątek zostje rzucony, gdy nastąpi błąd ogólny modułu zarządzającego (np. bład odczytu konfiguracji)
-	 * @throws SQLException 
+	 * 	Konstruktor tworzy obiekt klasy EventManager, który jest odpowiedzialny za zarządzanie Eventami oraz przekazywanie danych o nich do innych warstw aplikacji
+	 * @param mainWindow - obiekt reprezentujący główne okno aplikacji
+	 * @throws LineUnavailableException - wyjątek zostaje rzucony, gdy wystąpi błąd związany z uruchomieniem pliku dźwiękowego
+	 * @throws IOException - wyjątek zostaje rzucony, gdy wystąpi błąd związany z otwarciem pliku dźwiękowego
+	 * @throws UnsupportedAudioFileException - wyjątek zostaje rzucony, gdy wystąpi błąd związany z otwarciem pliku dźwiękowego
+	 * @throws EventManagerException - wyjątek zostaje rzucony, gdy nastąpi błąd ogólny modułu zarządzającego (np. bład odczytu konfiguracji)
 	 */
 	public EventManager(MainWindow mainWindow)
-			throws LineUnavailableException, IOException, UnsupportedAudioFileException, ParseException,
-			EventEmptyFieldException, EventInvalidDateException, EventInvalidTimeException, TimerDateTimeException, EventManagerException, SQLException {
+			throws LineUnavailableException, IOException, UnsupportedAudioFileException, EventManagerException {
 		this.mainWindow = mainWindow;
 
 		loadConfig();
@@ -119,15 +107,13 @@ public class EventManager {
 									try {
 										dataIo.updateEventInDatabase(event);
 									} catch (SQLException e) {}
-									createDirectory(directory);
-								//	sendDataToXml(event, directory + "/" + eventsFilename);
 								}
 							}
 						}
 
 						Thread.sleep(1000);
 
-					} catch (InterruptedException | TimerDateTimeException | EventInvalidTimeException | IOException e) {
+					} catch (InterruptedException | TimerDateTimeException | EventInvalidTimeException e) {
 					} 
 				}
 			}
@@ -136,6 +122,10 @@ public class EventManager {
 		alarmCheckThread.start();
 	}
 
+	/**
+	 * Metoda ładuje dane konfiguracyjne dotyczące połączenia z bazą danych do aplikacji
+	 * @throws EventManagerException - wyjątek zostaje rzucony, gdy nastąpi błąd odczytu konfiguracji
+	 */
 	public void loadConfig() throws EventManagerException
 	{
 		try {
@@ -146,6 +136,10 @@ public class EventManager {
 		
 	}
 	
+	/**
+	 * Metoda zapisuje dane konfiguracyjne dotyczące połączenia z bazą danych do pliku
+	 * @throws EventManagerException - wyjątek zostaje rzucony, gdy nastąpi błąd dostępu do pliku konfiguracyjnego
+	 */
 	public void saveConfig() throws EventManagerException
 	{
 		try {
@@ -155,6 +149,10 @@ public class EventManager {
 		}	
 	}
 	
+	/**
+	 * Metoda realizuje połączenie aplikacji z bazą danych
+	 * @return databaseConnected - flaga wskazująca, czy połączenie zostało ustanowione
+	 */
 	public boolean connectToDatabase()
 	{
 		String server = config.get("hostname");
@@ -192,11 +190,9 @@ public class EventManager {
 	}
 
 	/**
-	 * 	Metoda przekazuje dane o stworzonym Evencie do warstwy danych, gdzie następuje zapis informacji do pliku XML
-	 * @param event - obiekt reprezentujący aktualnie stworzony Event
+	 * 	Metoda przekazuje dane o konkretnym Evencie do warstwy danych, gdzie następuje zapis informacji do pliku XML
+	 * @param eventId - ID wybranego Eventu
 	 * @param filename - nazwa pliku, do którego zapisane zostaną dane
-	 * @throws SAXException - wyjątek zostaje rzucony, gdy nastąpi błąd parsowania pliku XML   
-	 * @throws IOException - wyjątek zostaje rzucony, gdy nastąpi błąd związany z otwarciem pliku do zapisu
 	 */
 	public void sendDataToXml(int eventId, String filename) {		
 		for (Event event :  eventCollection) {
@@ -206,21 +202,15 @@ public class EventManager {
 			}
 		}				
 	}
-
-	private void createDirectory(String directory) throws IOException {
-		var path = Paths.get(directory);
-		if (!Files.exists(path))
-			Files.createDirectory(path);
-	}
-
+	
 	/**
-	 * 	Metoda tworzy Event i dodaje go do kolekcji. Jako parametry przyjmuje dane niezbÄ™dne do stworzenia Eventu
-	 * @param titleValue
-	 * @param descriptionValue
-	 * @param locationValue
-	 * @param startDateValue
-	 * @param endDateValue
-	 * @param alarmDateTimeValue
+	 * 	Metoda tworzy Event, dodaje go do kolekcji oraz zapisuje w bazie danych. Jako parametry przyjmuje dane niezbędne do stworzenia Eventu
+	 * @param titleValue - tytuł Eventu
+	 * @param descriptionValue - opis Eventu
+	 * @param locationValue - lokalizacja Eventu
+	 * @param startDateValue - data początkowa Eventu
+	 * @param endDateValue - data końcowa Eventu
+	 * @param alarmDateTimeValue - czas uruchomienia alarmu
 	 * @throws EventManagerException - wyjątek zostaje rzucony, gdy podane zostaną błędne parametry
 	 */
 	public void addEvent(String titleValue, String descriptionValue, String locationValue, Date startDateValue, Date endDateValue, Date alarmDateTimeValue)
@@ -241,14 +231,12 @@ public class EventManager {
 	}
 
 	/**
-	 * 	Metoda usuwa Event i przekazuje aktualne informacje do warstwy danych, gdzie następuje aktualizacja pliku XML z danymi
+	 * 	Metoda usuwa Event z kolekcji oraz z bazy danych
 	 * @param eventId - numer indeksu Eventu do usunięcia
 	 * @throws EventManagerException - wyjątek zostaje rzucony, gdy podany zostanie błędny parametr
-	 * @throws SAXException - wyjątek zostaje rzucony, gdy nastąpi błąd parsowania pliku XML   
-	 * @throws IOException - wyjątek zostaje rzucony, gdy nastąpi błąd związany z otwarciem pliku do zapisu
-	 * @throws SQLException 
+	 * @throws SQLException - wyjątek zostaje rzucony, gdy nastąpi błąd związany z dostępem do bazy danych
 	 */
-	public void removeEvent(int eventId) throws EventManagerException, SAXException, IOException, SQLException {
+	public void removeEvent(int eventId) throws EventManagerException, SQLException {
 		for (Event event : eventCollection) {
 			if (event.getIndex() == eventId) {
 				dataIo.deleteEventFromDatabase(event);
@@ -264,8 +252,8 @@ public class EventManager {
 	}
 
 	/**
-	 * 	Metoda pobiera wartoÅ›Ä‡ wybranej daty z ekranu gÅ‚Ã³wnego i przekazuje jÄ… do stworzonego okna kreatora EventÃ³w
-	 * @param eventWindow - instancja gÅ‚Ã³wnego okna aplikacji
+	 * 	Metoda pobiera wartość wybranej daty z okna głównego i przekazuje ją do stworzonego okna kreatora Eventów
+	 * @param eventWindow - instancja głównego okna aplikacji
 	 */
 	public void fillStartDateField(EventWindow eventWindow) {
 		EventQueue.invokeLater(new Runnable() {
@@ -297,10 +285,9 @@ public class EventManager {
 	 * 	Metoda oblicza datę oraz godzinę uruchomienia alarmu
 	 * @param timerValue - data określająca, na jaki czas przed startem Eventu ma uruchomić się alarm
 	 * @param startDateValue - data określająca datę początkową Eventu
-	 * @return goOff - data określająca datę i godzinę uruchomienia alarmu
-	 * @throws ParseException - wyjątek zostaje rzucony, gdy wystąpi błąd formatów dat
+	 * @return Date - zmienna typu Date określająca datę i godzinę uruchomienia alarmu
 	 */
-	public Date setAlarmGoOffDate(Date timerValue, Date startDateValue) throws ParseException {
+	public Date setAlarmGoOffDate(Date timerValue, Date startDateValue) {
 		String timerTime = DataIO.parseDateToStringTimeOnly(timerValue);
 		String startDate = DataIO.parseDateToString(startDateValue);
 
@@ -318,6 +305,9 @@ public class EventManager {
 		return calendarStop.getTime();
 	}
 	
+	/**
+	 * 	Metoda pobiera Eventy z bazy danych
+	 */
 	public void importEventsFromDatabase()
 	{
 		try {
@@ -330,17 +320,17 @@ public class EventManager {
 	}
 
 	/**
-	 * 	Metoda importuje istniejÄ…ce Eventy z bazy XML przy uruchomieniu programu oraz tworzy na tej podstawie kolekcjÄ™ EventÃ³w
-	 * @throws ParseException - wyjÄ…tek zostaje rzucony, gdy wystÄ…pi bÅ‚Ä…d formatÃ³w dat
-	 * @throws EventEmptyFieldException - wyjÄ…tek zostaje rzucony, gdy nastÄ…pi bÅ‚Ä…d zwiÄ…zany z pobraniem Eventu z bazy
-	 * @throws EventInvalidDateException - wyjÄ…tek zostaje rzucony, gdy nastÄ…pi bÅ‚Ä…d zwiÄ…zany z pobraniem Eventu z bazy
-	 * @throws EventInvalidTimeException - wyjÄ…tek zostaje rzucony, gdy nastÄ…pi bÅ‚Ä…d zwiÄ…zany z pobraniem Eventu z bazy
-	 * @throws TimerDateTimeException - wyjÄ…tek zostaje rzucony, gdy nastÄ…pi bÅ‚Ä…d zwiÄ…zany z pobraniem Eventu z bazy
-	 * @throws IOException 
-	 * @throws SQLException 
+	 * 	Metoda importuje istniejące Eventy z pliku XML, zapisuje je do bazy danych oraz do kolekcji
+	 * @param filename - nazwa pliku, z którego zostaną zaimportowane dane
+	 * @throws ParseException - wyjątek zostaje rzucony, gdy nastąpi błąd związany z parsowaniem daty
+	 * @throws EventEmptyFieldException - wyjątek zostaje rzucony, gdy nastąpi błąd związany ze stworzeniem Eventu
+	 * @throws EventInvalidDateException - wyjątek zostaje rzucony, gdy nastąpi błąd związany ze stworzeniem Eventu
+	 * @throws EventInvalidTimeException - wyjątek zostaje rzucony, gdy nastąpi błąd związany ze stworzeniem Eventu
+	 * @throws TimerDateTimeException - wyjątek zostaje rzucony, gdy nastąpi błąd związany ze stworzeniem Eventu
+	 * @throws SQLException - wyjątek zostaje rzucony, gdy nastąpi błąd związany z dostępem do bazy danych
 	 */
 	public void importEventsFromXml(String filename) throws ParseException, EventEmptyFieldException, EventInvalidDateException,
-			EventInvalidTimeException, TimerDateTimeException, SQLException, IOException {
+			EventInvalidTimeException, TimerDateTimeException, SQLException {
 		NodeList nList = dataIo.getNodeListFromXml(filename);
 		if (nList != null) {
 			for (int item = 0; item < nList.getLength(); item++) {
@@ -377,6 +367,11 @@ public class EventManager {
 			return;
 	}
 
+	/**
+	 * Metoda filtruje dane zawarte w tabeli Eventów
+	 * @param table - tabela zawierająca dane o Eventach w oknie głównym aplikacji
+	 * @param field - pole, według którego filtrowane są dane
+	 */
 	public void filterEventsTable(JTable table, String field) {
 		DefaultTableModel model = (DefaultTableModel) table.getModel();
 		TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<DefaultTableModel>(model);
@@ -384,6 +379,14 @@ public class EventManager {
 		sorter.setRowFilter(RowFilter.regexFilter(field));
 	}
 	
+	/**
+	 * Metoda deleguje eksport danych o Evencie do iCalendara
+	 * @param eventId - numer indeksu Eventu do eksportu
+	 * @param filename - nazwa pliku, do którego wyeksportowane zostaną dane
+	 * @throws IOException - wyjątek zostaje rzucony, gdy nastąpi błąd związany z eksportem danych do pliku
+	 * @throws ValidationException - wyjątek zostaje rzucony, gdy nastąpi błąd związany z eksportem danych do pliku
+	 * @throws ParseException - wyjątek zostaje rzucony, gdy nastąpi błąd związany z eksportem danych do pliku
+	 */
 	public void exportToICalendar(int eventId, String filename) throws IOException, ValidationException, ParseException {
 		for (Event event :  eventCollection) {
 			if (event.getIndex() == eventId) {				

@@ -27,7 +27,6 @@ import java.awt.event.ActionEvent;
 import javax.swing.JCheckBox;
 import java.awt.FlowLayout;
 import javax.swing.SwingConstants;
-import javax.swing.table.DefaultTableModel;
 
 import model.DataIO;
 
@@ -361,11 +360,7 @@ public class EventWindow {
 				timerValue = (Date) ((JSpinner) timerPanel.getComponent(0)).getValue();
 
 				if (chckbxSetAlarm.isSelected())
-					try {
-						alarmDateTimeValue = eventManager.setAlarmGoOffDate(timerValue, startDate);
-					} catch (ParseException e2) {
-						e2.printStackTrace();
-					}
+					alarmDateTimeValue = eventManager.setAlarmGoOffDate(timerValue, startDate);
 				
 				try {
 					eventManager.addEvent(titleValue, descriptionValue, locationValue, startDate, endDate, alarmDateTimeValue);
