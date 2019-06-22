@@ -59,6 +59,7 @@ import javax.swing.JSplitPane;
 import java.awt.event.KeyAdapter;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.ListSelectionModel;
 
 public class MainWindow implements MenuListener, ActionListener, KeyListener {
 
@@ -81,7 +82,6 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 	private JLabel labelEvents;
 	private JSplitPane splitPaneFilter;
 	private JTextField txtFieldFilter;
-	private final Action action = new SwingAction();
 	private JMenuItem gSettings;
 	private JMenu gExport;
 	private JMenuItem gICalendar;
@@ -97,7 +97,6 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 	public MainWindow() throws Exception {
 		try {
 			eventManager = new EventManager(this);
-			// initialize();
 		} catch (LineUnavailableException e) {
 			JOptionPane.showMessageDialog(null, e.getMessage(), "LineUnavailableException", JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();
@@ -216,76 +215,83 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		deleteEventBtn.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		panelButtons.add(deleteEventBtn);
 		createEventBtn.addActionListener(this);
+		
+				panel = new JPanel();
+				window.getContentPane().add(panel);
+				GridBagLayout gbl_panel = new GridBagLayout();
+				gbl_panel.columnWidths = new int[] { 363 };
+				gbl_panel.rowHeights = new int[] { 21, 0, 233 };
+				gbl_panel.columnWeights = new double[] { 1.0 };
+				gbl_panel.rowWeights = new double[] { 0.0, 0.0, 1.0 };
+				panel.setLayout(gbl_panel);
+				
+						splitPaneFilter = new JSplitPane();
+						GridBagConstraints gbc_splitPaneFilter = new GridBagConstraints();
+						gbc_splitPaneFilter.fill = GridBagConstraints.BOTH;
+						gbc_splitPaneFilter.insets = new Insets(0, 0, 5, 0);
+						gbc_splitPaneFilter.gridx = 0;
+						gbc_splitPaneFilter.gridy = 0;
+						panel.add(splitPaneFilter, gbc_splitPaneFilter);
+						
+								labelFilter = new JLabel("Filter events by:");
+								splitPaneFilter.setLeftComponent(labelFilter);
+								labelFilter.setHorizontalAlignment(SwingConstants.LEFT);
+								labelFilter.setLabelFor(panel);
+								labelFilter.setFont(new Font("Tahoma", Font.PLAIN, 12));
+								
+										txtFieldFilter = new JTextField();
+										txtFieldFilter.addKeyListener(new KeyAdapter() {
+											@Override
+											public void keyReleased(KeyEvent e) {
+												String filterByField = txtFieldFilter.getText();
+												eventManager.filterEventsTable(table, filterByField);
+											}
+										});
+										splitPaneFilter.setRightComponent(txtFieldFilter);
+										txtFieldFilter.setColumns(10);
+										
+												labelEvents = new JLabel("View your events: ");
+												labelEvents.setHorizontalAlignment(SwingConstants.LEFT);
+												labelEvents.setFont(new Font("Tahoma", Font.PLAIN, 12));
+												GridBagConstraints gbc_labelEvents = new GridBagConstraints();
+												gbc_labelEvents.anchor = GridBagConstraints.WEST;
+												gbc_labelEvents.insets = new Insets(0, 0, 5, 0);
+												gbc_labelEvents.gridx = 0;
+												gbc_labelEvents.gridy = 1;
+												panel.add(labelEvents, gbc_labelEvents);
+												
+														scrollPane = new JScrollPane();
+														
+																table = new JTable() {
+														
+																	@Override
+																	public boolean isCellEditable(int row, int column) {
+																		return false;
+																	}
+														
+																};
+																table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+																table.addKeyListener(new KeyAdapter() {
+																	@Override
+																	public void keyReleased(KeyEvent e) {
+																		if(e.getKeyCode() == KeyEvent.VK_DELETE) removeSelectedEvent();
+																	}
+																});
+																table.setModel(new DefaultTableModel(new Object[][] {}, new String[] { "Id", "Title", "Start date" }) {
+																	@SuppressWarnings("rawtypes")
+																	Class[] columnTypes = new Class[] { Integer.class, Object.class, Object.class };
 
-		panel = new JPanel();
-		window.getContentPane().add(panel);
-		GridBagLayout gbl_panel = new GridBagLayout();
-		gbl_panel.columnWidths = new int[] { 363 };
-		gbl_panel.rowHeights = new int[] { 21, 0, 233 };
-		gbl_panel.columnWeights = new double[] { 1.0 };
-		gbl_panel.rowWeights = new double[] { 0.0, 0.0, 1.0 };
-		panel.setLayout(gbl_panel);
-
-		splitPaneFilter = new JSplitPane();
-		GridBagConstraints gbc_splitPaneFilter = new GridBagConstraints();
-		gbc_splitPaneFilter.fill = GridBagConstraints.BOTH;
-		gbc_splitPaneFilter.insets = new Insets(0, 0, 5, 0);
-		gbc_splitPaneFilter.gridx = 0;
-		gbc_splitPaneFilter.gridy = 0;
-		panel.add(splitPaneFilter, gbc_splitPaneFilter);
-
-		labelFilter = new JLabel("Filter events by:");
-		splitPaneFilter.setLeftComponent(labelFilter);
-		labelFilter.setHorizontalAlignment(SwingConstants.LEFT);
-		labelFilter.setLabelFor(panel);
-		labelFilter.setFont(new Font("Tahoma", Font.PLAIN, 12));
-
-		txtFieldFilter = new JTextField();
-		txtFieldFilter.addKeyListener(new KeyAdapter() {
-			@Override
-			public void keyReleased(KeyEvent e) {
-				String filterByField = txtFieldFilter.getText();
-				eventManager.filterEventsTable(table, filterByField);
-			}
-		});
-		splitPaneFilter.setRightComponent(txtFieldFilter);
-		txtFieldFilter.setColumns(10);
-
-		labelEvents = new JLabel("View your events: ");
-		labelEvents.setHorizontalAlignment(SwingConstants.LEFT);
-		labelEvents.setFont(new Font("Tahoma", Font.PLAIN, 12));
-		GridBagConstraints gbc_labelEvents = new GridBagConstraints();
-		gbc_labelEvents.anchor = GridBagConstraints.WEST;
-		gbc_labelEvents.insets = new Insets(0, 0, 5, 0);
-		gbc_labelEvents.gridx = 0;
-		gbc_labelEvents.gridy = 1;
-		panel.add(labelEvents, gbc_labelEvents);
-
-		scrollPane = new JScrollPane();
-
-		table = new JTable() {
-
-			@Override
-			public boolean isCellEditable(int row, int column) {
-				return false;
-			}
-
-		};
-		table.setModel(new DefaultTableModel(new Object[][] {}, new String[] { "Id", "Title", "Start date" }) {
-			@SuppressWarnings("rawtypes")
-			Class[] columnTypes = new Class[] { Integer.class, Object.class, Object.class };
-
-			public Class getColumnClass(int columnIndex) {
-				return columnTypes[columnIndex];
-			}
-		});
-		table.getColumnModel().getColumn(0).setPreferredWidth(40);
-		scrollPane.setViewportView(table);
-		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
-		gbc_scrollPane.fill = GridBagConstraints.BOTH;
-		gbc_scrollPane.gridx = 0;
-		gbc_scrollPane.gridy = 2;
-		panel.add(scrollPane, gbc_scrollPane);
+																	public Class getColumnClass(int columnIndex) {
+																		return columnTypes[columnIndex];
+																	}
+																});
+																table.getColumnModel().getColumn(0).setPreferredWidth(40);
+																scrollPane.setViewportView(table);
+																GridBagConstraints gbc_scrollPane = new GridBagConstraints();
+																gbc_scrollPane.fill = GridBagConstraints.BOTH;
+																gbc_scrollPane.gridx = 0;
+																gbc_scrollPane.gridy = 2;
+																panel.add(scrollPane, gbc_scrollPane);
 	}
 
 	private void showSelectedDate(JCalendar calendar) {
@@ -440,20 +446,7 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		}
 
 		if (e.getSource().equals(deleteEventBtn)) {
-			if(table.getSelectedRowCount() > 0)
-			{
-				int eventId = (Integer) table.getValueAt(table.getSelectedRow(), 0);
-				if (JOptionPane.showConfirmDialog(null, "Do you really want to remove selected event?", "Delete event",
-						JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-					try {
-						eventManager.removeEvent(eventId);
-						refreshEventsTable();
-					} catch (EventManagerException | SAXException | IOException | SQLException e1) {
-						JOptionPane.showMessageDialog(null, e1.getMessage(), "Delete event", JOptionPane.ERROR_MESSAGE);
-						e1.printStackTrace();
-					}
-				}
-			}
+			removeSelectedEvent();
 		}
 		
 		if (e.getSource().equals(gICalendar)) {
@@ -483,19 +476,27 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		}
 
 	}
-
-	public void showPane(String title, String infoMessage) {
-		JOptionPane.showMessageDialog(null, infoMessage, title, JOptionPane.INFORMATION_MESSAGE);
-
+	
+	public void removeSelectedEvent()
+	{
+		if(table.getSelectedRowCount() > 0)
+		{
+			int eventId = (Integer) table.getValueAt(table.getSelectedRow(), 0);
+			if (JOptionPane.showConfirmDialog(null, "Do you really want to remove selected event?", "Delete event",
+					JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+				try {
+					eventManager.removeEvent(eventId);
+					refreshEventsTable();
+				} catch (EventManagerException | SAXException | IOException | SQLException e1) {
+					JOptionPane.showMessageDialog(null, e1.getMessage(), "Delete event", JOptionPane.ERROR_MESSAGE);
+					e1.printStackTrace();
+				}
+			}
+		}
 	}
 
-	private class SwingAction extends AbstractAction {
-		public SwingAction() {
-			putValue(NAME, "SwingAction");
-			putValue(SHORT_DESCRIPTION, "Some short description");
-		}
+	public void showInformationMessageDialog(String title, String infoMessage) {
+		JOptionPane.showMessageDialog(null, infoMessage, title, JOptionPane.INFORMATION_MESSAGE);
 
-		public void actionPerformed(ActionEvent e) {
-		}
 	}
 }

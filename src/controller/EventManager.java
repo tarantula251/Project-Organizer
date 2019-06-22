@@ -111,7 +111,7 @@ public class EventManager {
 								int comparedTime = date.compareTo(event.getAlarmDateTime());
 								if (comparedTime >= 0) {
 									clip.start();
-									mainWindow.showPane("Alarm",
+									mainWindow.showInformationMessageDialog("Alarm",
 											"Title: " + event.getTitle() + "\nStart: " + event.getStartDate() + " "
 													+ "\nEnd: " + event.getEndDate() + " "
 													+ "\n");
