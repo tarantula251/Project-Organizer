@@ -61,9 +61,6 @@ public class EventManager {
 	 */
 	private String directory = "databank";
 	
-	private String directoryExport = "export";
-	
-	private String iCalendarFilename = "icalendar.ics";
 	/**
 	 * 	Pole eventsFilename okreÅ›lajÄ…ce nazwÄ™ pliku XML z danymi
 	 */
@@ -121,15 +118,14 @@ public class EventManager {
 										dataIo.updateEventInDatabase(event);
 									} catch (SQLException e) {}
 									createDirectory(directory);
-									sendDataToXml(event, directory + "/" + eventsFilename);
+								//	sendDataToXml(event, directory + "/" + eventsFilename);
 								}
 							}
 						}
 
 						Thread.sleep(1000);
 
-					} catch (InterruptedException | TimerDateTimeException | EventInvalidTimeException | SAXException
-							| IOException e) {
+					} catch (InterruptedException | TimerDateTimeException | EventInvalidTimeException | IOException e) {
 					} 
 				}
 			}
@@ -198,14 +194,13 @@ public class EventManager {
 	 * @throws SAXException - wyjątek zostaje rzucony, gdy nastąpi błąd parsowania pliku XML   
 	 * @throws IOException - wyjątek zostaje rzucony, gdy nastąpi błąd związany z otwarciem pliku do zapisu
 	 */
-	private void sendDataToXml(Event event, String filename) throws SAXException, IOException {		
-		dataIo.writeToXml(event, filename);
-		if (eventCollection.size() > 1) {
-			for (Event existingEvent : eventCollection) {
-				if (existingEvent != event)
-					dataIo.appendXml(existingEvent);
+	public void sendDataToXml(int eventId, String filename) {		
+		for (Event event :  eventCollection) {
+			if (event.getIndex() == eventId) {				
+				dataIo.writeToXml(event, filename);
+				return;
 			}
-		}
+		}				
 	}
 
 	private void createDirectory(String directory) throws IOException {

@@ -18,9 +18,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import java.util.HashMap;
-import java.util.TimeZone;
 
-import javax.sound.sampled.AudioInputStream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -44,12 +42,10 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import controller.EventManager;
 import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.model.*;
 import net.fortuna.ical4j.model.component.VAlarm;
 import net.fortuna.ical4j.model.component.VEvent;
-import net.fortuna.ical4j.model.component.VTimeZone;
 import net.fortuna.ical4j.model.property.*;
 
 import model.exception.EventEmptyFieldException;
@@ -168,7 +164,7 @@ public class DataIO {
 
 			StreamResult result = new StreamResult(dataFile);
 
-			transformer.transform(source, result);
+			transformer.transform(source, result);			
 
 		} catch (ParserConfigurationException | TransformerException e) {
 			e.printStackTrace();

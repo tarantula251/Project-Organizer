@@ -99,6 +99,7 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 	public MainWindow() throws Exception {
 		try {
 			eventManager = new EventManager(this);
+			//initialize();
 		} catch (LineUnavailableException e) {
 			JOptionPane.showMessageDialog(null, e.getMessage(), "LineUnavailableException", JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();
@@ -358,6 +359,7 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 
 		gXml = new JMenuItem("XML file");
 		gXml.setMnemonic(KeyEvent.VK_X);
+		gXml.addActionListener(this);
 		gExport.add(gXml);
 		menu.add(gAbout);
 
@@ -482,7 +484,27 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 				}
 			}
 		}
-
+		
+		if (e.getSource().equals(gXml)) {			
+			if(table.getSelectedRowCount() > 0) {
+				String exportFilename = null;
+				int eventId = (Integer) table.getValueAt(table.getSelectedRow(), 0);
+				if (String.valueOf(eventId) != null && !String.valueOf(eventId).isEmpty()) {
+					JFileChooser saveFileDialog = new JFileChooser();
+					saveFileDialog.setFileFilter(new FileNameExtensionFilter("XML file", "xml"));				
+					int dialogResult = saveFileDialog.showSaveDialog(window);
+					if (dialogResult == JFileChooser.APPROVE_OPTION) {							
+						String filename = saveFileDialog.getSelectedFile().getName();							
+						if (!filename.endsWith(".xml"))
+							filename += ".xml";														
+						exportFilename = saveFileDialog.getCurrentDirectory().toString() + "/" + filename;
+					}
+					if (exportFilename == null)
+						return;
+					eventManager.sendDataToXml(eventId, exportFilename);										
+				}
+			}
+		}
 	}
 
 	public void removeSelectedEvent() {
