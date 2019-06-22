@@ -28,6 +28,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -215,83 +217,92 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		deleteEventBtn.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		panelButtons.add(deleteEventBtn);
 		createEventBtn.addActionListener(this);
-		
-				panel = new JPanel();
-				window.getContentPane().add(panel);
-				GridBagLayout gbl_panel = new GridBagLayout();
-				gbl_panel.columnWidths = new int[] { 363 };
-				gbl_panel.rowHeights = new int[] { 21, 0, 233 };
-				gbl_panel.columnWeights = new double[] { 1.0 };
-				gbl_panel.rowWeights = new double[] { 0.0, 0.0, 1.0 };
-				panel.setLayout(gbl_panel);
-				
-						splitPaneFilter = new JSplitPane();
-						GridBagConstraints gbc_splitPaneFilter = new GridBagConstraints();
-						gbc_splitPaneFilter.fill = GridBagConstraints.BOTH;
-						gbc_splitPaneFilter.insets = new Insets(0, 0, 5, 0);
-						gbc_splitPaneFilter.gridx = 0;
-						gbc_splitPaneFilter.gridy = 0;
-						panel.add(splitPaneFilter, gbc_splitPaneFilter);
-						
-								labelFilter = new JLabel("Filter events by:");
-								splitPaneFilter.setLeftComponent(labelFilter);
-								labelFilter.setHorizontalAlignment(SwingConstants.LEFT);
-								labelFilter.setLabelFor(panel);
-								labelFilter.setFont(new Font("Tahoma", Font.PLAIN, 12));
-								
-										txtFieldFilter = new JTextField();
-										txtFieldFilter.addKeyListener(new KeyAdapter() {
-											@Override
-											public void keyReleased(KeyEvent e) {
-												String filterByField = txtFieldFilter.getText();
-												eventManager.filterEventsTable(table, filterByField);
-											}
-										});
-										splitPaneFilter.setRightComponent(txtFieldFilter);
-										txtFieldFilter.setColumns(10);
-										
-												labelEvents = new JLabel("View your events: ");
-												labelEvents.setHorizontalAlignment(SwingConstants.LEFT);
-												labelEvents.setFont(new Font("Tahoma", Font.PLAIN, 12));
-												GridBagConstraints gbc_labelEvents = new GridBagConstraints();
-												gbc_labelEvents.anchor = GridBagConstraints.WEST;
-												gbc_labelEvents.insets = new Insets(0, 0, 5, 0);
-												gbc_labelEvents.gridx = 0;
-												gbc_labelEvents.gridy = 1;
-												panel.add(labelEvents, gbc_labelEvents);
-												
-														scrollPane = new JScrollPane();
-														
-																table = new JTable() {
-														
-																	@Override
-																	public boolean isCellEditable(int row, int column) {
-																		return false;
-																	}
-														
-																};
-																table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-																table.addKeyListener(new KeyAdapter() {
-																	@Override
-																	public void keyReleased(KeyEvent e) {
-																		if(e.getKeyCode() == KeyEvent.VK_DELETE) removeSelectedEvent();
-																	}
-																});
-																table.setModel(new DefaultTableModel(new Object[][] {}, new String[] { "Id", "Title", "Start date" }) {
-																	@SuppressWarnings("rawtypes")
-																	Class[] columnTypes = new Class[] { Integer.class, Object.class, Object.class };
 
-																	public Class getColumnClass(int columnIndex) {
-																		return columnTypes[columnIndex];
-																	}
-																});
-																table.getColumnModel().getColumn(0).setPreferredWidth(40);
-																scrollPane.setViewportView(table);
-																GridBagConstraints gbc_scrollPane = new GridBagConstraints();
-																gbc_scrollPane.fill = GridBagConstraints.BOTH;
-																gbc_scrollPane.gridx = 0;
-																gbc_scrollPane.gridy = 2;
-																panel.add(scrollPane, gbc_scrollPane);
+		panel = new JPanel();
+		window.getContentPane().add(panel);
+		GridBagLayout gbl_panel = new GridBagLayout();
+		gbl_panel.columnWidths = new int[] { 363 };
+		gbl_panel.rowHeights = new int[] { 21, 0, 233 };
+		gbl_panel.columnWeights = new double[] { 1.0 };
+		gbl_panel.rowWeights = new double[] { 0.0, 0.0, 1.0 };
+		panel.setLayout(gbl_panel);
+
+		splitPaneFilter = new JSplitPane();
+		GridBagConstraints gbc_splitPaneFilter = new GridBagConstraints();
+		gbc_splitPaneFilter.fill = GridBagConstraints.BOTH;
+		gbc_splitPaneFilter.insets = new Insets(0, 0, 5, 0);
+		gbc_splitPaneFilter.gridx = 0;
+		gbc_splitPaneFilter.gridy = 0;
+		panel.add(splitPaneFilter, gbc_splitPaneFilter);
+
+		labelFilter = new JLabel("Filter events by:");
+		splitPaneFilter.setLeftComponent(labelFilter);
+		labelFilter.setHorizontalAlignment(SwingConstants.LEFT);
+		labelFilter.setLabelFor(panel);
+		labelFilter.setFont(new Font("Tahoma", Font.PLAIN, 12));
+
+		txtFieldFilter = new JTextField();
+		txtFieldFilter.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				String filterByField = txtFieldFilter.getText();
+				eventManager.filterEventsTable(table, filterByField);
+			}
+		});
+		splitPaneFilter.setRightComponent(txtFieldFilter);
+		txtFieldFilter.setColumns(10);
+
+		labelEvents = new JLabel("View your events: ");
+		labelEvents.setHorizontalAlignment(SwingConstants.LEFT);
+		labelEvents.setFont(new Font("Tahoma", Font.PLAIN, 12));
+		GridBagConstraints gbc_labelEvents = new GridBagConstraints();
+		gbc_labelEvents.anchor = GridBagConstraints.WEST;
+		gbc_labelEvents.insets = new Insets(0, 0, 5, 0);
+		gbc_labelEvents.gridx = 0;
+		gbc_labelEvents.gridy = 1;
+		panel.add(labelEvents, gbc_labelEvents);
+
+		scrollPane = new JScrollPane();
+
+		table = new JTable() {
+
+			@Override
+			public boolean isCellEditable(int row, int column) {
+				return false;
+			}
+
+		};
+		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				if (!e.getValueIsAdjusting())
+					gExport.setEnabled(table.getSelectedRowCount() > 0);
+			}
+		});
+		table.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_DELETE)
+					removeSelectedEvent();
+			}
+		});
+		table.setModel(new DefaultTableModel(new Object[][] {}, new String[] { "Id", "Title", "Start date" }) {
+			@SuppressWarnings("rawtypes")
+			Class[] columnTypes = new Class[] { Integer.class, Object.class, Object.class };
+
+			public Class getColumnClass(int columnIndex) {
+				return columnTypes[columnIndex];
+			}
+		});
+		table.getColumnModel().getColumn(0).setPreferredWidth(40);
+		scrollPane.setViewportView(table);
+		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
+		gbc_scrollPane.fill = GridBagConstraints.BOTH;
+		gbc_scrollPane.gridx = 0;
+		gbc_scrollPane.gridy = 2;
+		panel.add(scrollPane, gbc_scrollPane);
 	}
 
 	private void showSelectedDate(JCalendar calendar) {
@@ -336,6 +347,7 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		menu.add(gSettings);
 
 		gExport = new JMenu("Export to");
+		gExport.setEnabled(false);
 		gExport.setMnemonic(KeyEvent.VK_E);
 		menu.add(gExport);
 
@@ -398,7 +410,7 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 	}
 
 	/**
-	 * 	Metoda odpowiedzialna za wywołanie akcji
+	 * Metoda odpowiedzialna za wywołanie akcji
 	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -406,28 +418,24 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		if (e.getSource().equals(gSettings)) {
 			SettingsDialog settingsDialog = new SettingsDialog(this);
 			settingsDialog.setVisible(true);
-			if(settingsDialog.getDialogResult() == 1)
-			{
+			if (settingsDialog.getDialogResult() == 1) {
 				try {
 					eventManager.saveConfig();
 				} catch (EventManagerException e1) {
-					JOptionPane.showMessageDialog(window, e1.getMessage(), "Configuration",
-							JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(window, e1.getMessage(), "Configuration", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
-				if(eventManager.connectToDatabase())
-				{
+				if (eventManager.connectToDatabase()) {
 					eventManager.importEventsFromDatabase();
 					refreshEventsTable();
-				}
-				else
-				{
-					JOptionPane.showMessageDialog(window, "Connection to database could not be established. Backup XML file will be used.", "Database",
-							JOptionPane.ERROR_MESSAGE);
+				} else {
+					JOptionPane.showMessageDialog(window,
+							"Connection to database could not be established. Backup XML file will be used.",
+							"Database", JOptionPane.ERROR_MESSAGE);
 				}
 			}
 		}
-		
+
 		if (e.getSource().equals(gAbout)) {
 			JOptionPane.showMessageDialog(window, new AboutProgramWindow().getAboutProgramMessage(), "About Program",
 					JOptionPane.PLAIN_MESSAGE);
@@ -448,25 +456,25 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		if (e.getSource().equals(deleteEventBtn)) {
 			removeSelectedEvent();
 		}
-		
+
 		if (e.getSource().equals(gICalendar)) {
-			if(table.getSelectedRowCount() > 0) {
+			if (table.getSelectedRowCount() > 0) {
 				try {
 					String exportFilename = null;
 					int eventId = (Integer) table.getValueAt(table.getSelectedRow(), 0);
 					if (String.valueOf(eventId) != null && !String.valueOf(eventId).isEmpty()) {
 						JFileChooser saveFileDialog = new JFileChooser();
-						saveFileDialog.setFileFilter(new FileNameExtensionFilter("iCalendar file", "ics"));				
+						saveFileDialog.setFileFilter(new FileNameExtensionFilter("iCalendar file", "ics"));
 						int dialogResult = saveFileDialog.showSaveDialog(window);
-						if (dialogResult == JFileChooser.APPROVE_OPTION) {							
-							String filename = saveFileDialog.getSelectedFile().getName();							
+						if (dialogResult == JFileChooser.APPROVE_OPTION) {
+							String filename = saveFileDialog.getSelectedFile().getName();
 							if (!filename.endsWith(".ics"))
-								filename += ".ics";														
+								filename += ".ics";
 							exportFilename = saveFileDialog.getCurrentDirectory().toString() + "/" + filename;
 						}
 						if (exportFilename == null)
 							return;
-						eventManager.exportToICalendar(eventId, exportFilename);										
+						eventManager.exportToICalendar(eventId, exportFilename);
 					}
 
 				} catch (IOException | ValidationException | ParseException e1) {
@@ -476,11 +484,9 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		}
 
 	}
-	
-	public void removeSelectedEvent()
-	{
-		if(table.getSelectedRowCount() > 0)
-		{
+
+	public void removeSelectedEvent() {
+		if (table.getSelectedRowCount() > 0) {
 			int eventId = (Integer) table.getValueAt(table.getSelectedRow(), 0);
 			if (JOptionPane.showConfirmDialog(null, "Do you really want to remove selected event?", "Delete event",
 					JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
