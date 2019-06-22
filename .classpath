@@ -7,6 +7,10 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/jcalendar-1.4.jar"/>
-	<classpathentry kind="lib" path="lib/mysql-connector-java-8.0.16.jar"/>
+	<classpathentry kind="lib" path="C:/Users/justy/Desktop/Project-Organizer/lib/mysql-connector-java-8.0.16.jar"/>
+	<classpathentry kind="lib" path="lib/apache-commons-lang.jar"/>
+	<classpathentry kind="lib" path="lib/backport-util-concurrent-3.0.jar"/>
+	<classpathentry kind="lib" path="lib/ical4j-1.0.jar"/>
+	<classpathentry kind="lib" path="lib/org-apache-commons-logging.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -18,6 +18,7 @@ import java.util.Date;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -29,6 +30,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import model.DataIO;
 import org.xml.sax.SAXException;
@@ -49,6 +51,7 @@ import model.exception.EventEmptyFieldException;
 import model.exception.EventInvalidDateException;
 import model.exception.EventInvalidTimeException;
 import model.exception.TimerDateTimeException;
+import net.fortuna.ical4j.model.ValidationException;
 
 import javax.swing.table.DefaultTableModel;
 import com.toedter.calendar.JCalendar;
@@ -80,14 +83,21 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 	private JTextField txtFieldFilter;
 	private final Action action = new SwingAction();
 	private JMenuItem gSettings;
+	private JMenu gExport;
+	private JMenuItem gICalendar;
+	private JMenuItem gXml;
 
 	/**
-	 * 	Konstruktor tworzy obiekt klasy MainWindow, który jest głównym oknem aplikacji.
-	 * @throws Exception - wyjątek zostaje rzucony, gdy którykolwiek z użytych komponentów rzuci wyjątek
+	 * Konstruktor tworzy obiekt klasy MainWindow, który jest głównym oknem
+	 * aplikacji.
+	 * 
+	 * @throws Exception - wyjątek zostaje rzucony, gdy którykolwiek z użytych
+	 *                   komponentów rzuci wyjątek
 	 */
 	public MainWindow() throws Exception {
 		try {
 			eventManager = new EventManager(this);
+			// initialize();
 		} catch (LineUnavailableException e) {
 			JOptionPane.showMessageDialog(null, e.getMessage(), "LineUnavailableException", JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();
@@ -97,7 +107,8 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 			e.printStackTrace();
 			throw new Exception();
 		} catch (UnsupportedAudioFileException e) {
-			JOptionPane.showMessageDialog(null, e.getMessage(), "UnsupportedAudioFileException", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null, e.getMessage(), "UnsupportedAudioFileException",
+					JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();
 			throw new Exception();
 		} catch (ParseException e) {
@@ -124,15 +135,15 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 			JOptionPane.showMessageDialog(null, e.getMessage(), "TimerDateTimeException", JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();
 			throw new Exception();
-		} catch(Exception e)
-		{
+		} catch (Exception e) {
 			throw new Exception();
 		}
 	}
+
 	/**
-	 * 	Metoda inicjująca okno i określająca jego ogólny wygląd
+	 * Metoda inicjująca okno i określająca jego ogólny wygląd
 	 */
-	public void initialize(){
+	public void initialize() {
 		window.setResizable(false);
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		addCalendar();
@@ -144,13 +155,15 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 	}
 
 	/**
-	 * 	Metoda odświeża wygląd tabeli z Eventami, gdy kolekcja Eventów jest aktualizowana
+	 * Metoda odświeża wygląd tabeli z Eventami, gdy kolekcja Eventów jest
+	 * aktualizowana
 	 */
 	private void refreshEventsTable() {
 		var model = (DefaultTableModel) table.getModel();
 		model.setRowCount(0);
 		for (Event event : eventManager.getEventCollection())
-			model.addRow(new Object[] { event.getIndex(), event.getTitle(), DataIO.parseDateToString(event.getStartDate()) });
+			model.addRow(new Object[] { event.getIndex(), event.getTitle(),
+					DataIO.parseDateToString(event.getStartDate()) });
 	}
 
 	public JFrame getWindow() {
@@ -170,7 +183,7 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 	}
 
 	/**
-	 * 	Metoda dodaje do okna głównego komponent JCalendar
+	 * Metoda dodaje do okna głównego komponent JCalendar
 	 */
 	@SuppressWarnings("serial")
 	private void addCalendar() {
@@ -258,15 +271,14 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 			}
 
 		};
-		table.setModel(
-				new DefaultTableModel(new Object[][] {}, new String[] { "Id", "Title", "Start date" }) {
-					@SuppressWarnings("rawtypes")
-					Class[] columnTypes = new Class[] { Integer.class, Object.class, Object.class };
+		table.setModel(new DefaultTableModel(new Object[][] {}, new String[] { "Id", "Title", "Start date" }) {
+			@SuppressWarnings("rawtypes")
+			Class[] columnTypes = new Class[] { Integer.class, Object.class, Object.class };
 
-					public Class getColumnClass(int columnIndex) {
-						return columnTypes[columnIndex];
-					}
-				});
+			public Class getColumnClass(int columnIndex) {
+				return columnTypes[columnIndex];
+			}
+		});
 		table.getColumnModel().getColumn(0).setPreferredWidth(40);
 		scrollPane.setViewportView(table);
 		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
@@ -295,7 +307,7 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 	}
 
 	/**
-	 * 	Metoda dodaje menu do paska aplikacji
+	 * Metoda dodaje menu do paska aplikacji
 	 */
 	private void addMenuBar() {
 		this.addKeyListener(this);
@@ -310,17 +322,30 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		gAbout = new JMenuItem("About program");
 		gAbout.setMnemonic(KeyEvent.VK_A);
 		gAbout.addActionListener(this);
-		
+
 		gSettings = new JMenuItem("Settings");
 		gSettings.setMnemonic(KeyEvent.VK_S);
 		gSettings.addActionListener(this);
 
+		menu.add(gSettings);
+
+		gExport = new JMenu("Export to");
+		gExport.setMnemonic(KeyEvent.VK_E);
+		menu.add(gExport);
+
+		gICalendar = new JMenuItem("iCalendar");
+		gICalendar.setMnemonic(KeyEvent.VK_S);
+		gICalendar.addActionListener(this);
+		gExport.add(gICalendar);
+
+		gXml = new JMenuItem("XML file");
+		gXml.setMnemonic(KeyEvent.VK_X);
+		gExport.add(gXml);
+		menu.add(gAbout);
+
 		gExit = new JMenuItem("Exit");
 		gExit.setMnemonic(KeyEvent.VK_X);
 		gExit.addActionListener(this);
-		
-		menu.add(gSettings);
-		menu.add(gAbout);
 		menu.add(gExit);
 
 		window.setJMenuBar(menuBar);
@@ -430,6 +455,32 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 				}
 			}
 		}
+		
+		if (e.getSource().equals(gICalendar)) {
+			if(table.getSelectedRowCount() > 0) {
+				try {
+					String exportFilename = null;
+					int eventId = (Integer) table.getValueAt(table.getSelectedRow(), 0);
+					if (String.valueOf(eventId) != null && !String.valueOf(eventId).isEmpty()) {
+						JFileChooser saveFileDialog = new JFileChooser();
+						saveFileDialog.setFileFilter(new FileNameExtensionFilter("iCalendar file", "ics"));				
+						int dialogResult = saveFileDialog.showSaveDialog(window);
+						if (dialogResult == JFileChooser.APPROVE_OPTION) {							
+							String filename = saveFileDialog.getSelectedFile().getName();							
+							if (!filename.endsWith(".ics"))
+								filename += ".ics";														
+							exportFilename = saveFileDialog.getCurrentDirectory().toString() + "/" + filename;
+						}
+						if (exportFilename == null)
+							return;
+						eventManager.exportToICalendar(eventId, exportFilename);										
+					}
+
+				} catch (IOException | ValidationException | ParseException e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
 
 	}
 
@@ -437,11 +488,13 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		JOptionPane.showMessageDialog(null, infoMessage, title, JOptionPane.INFORMATION_MESSAGE);
 
 	}
+
 	private class SwingAction extends AbstractAction {
 		public SwingAction() {
 			putValue(NAME, "SwingAction");
 			putValue(SHORT_DESCRIPTION, "Some short description");
 		}
+
 		public void actionPerformed(ActionEvent e) {
 		}
 	}

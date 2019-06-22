@@ -3,6 +3,7 @@ package model;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
@@ -17,7 +18,9 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import java.util.HashMap;
+import java.util.TimeZone;
 
+import javax.sound.sampled.AudioInputStream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -40,6 +43,14 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
+import controller.EventManager;
+import net.fortuna.ical4j.data.CalendarOutputter;
+import net.fortuna.ical4j.model.*;
+import net.fortuna.ical4j.model.component.VAlarm;
+import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.component.VTimeZone;
+import net.fortuna.ical4j.model.property.*;
 
 import model.exception.EventEmptyFieldException;
 import model.exception.EventInvalidDateException;
@@ -211,8 +222,8 @@ public class DataIO {
 		statement.setTimestamp(6, notification);
 	}
 	
-	public int insertEventToDatabase(Event event) throws SQLException
-	{
+	public int insertEventToDatabase(Event event) throws SQLException, IOException
+	{		
 		if(dataBaseConnecion == null) throw new SQLException("No database connected");
 		PreparedStatement statement = dataBaseConnecion.prepareStatement("INSERT INTO events VALUES (null, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
 		prepareEventStatement(event, statement);
@@ -346,7 +357,6 @@ public class DataIO {
 			transformer.transform(source, result);
 
 		} catch (ParserConfigurationException | TransformerException pce) {
-			pce.printStackTrace();
 		}
 	}
 	
@@ -354,6 +364,43 @@ public class DataIO {
 	{
 		String url = "jdbc:mysql://"+server+":"+port+"/"+database;
 		return DriverManager.getConnection(url, user, password);
+	}
+
+	public void saveICalendar(Event event, String filename) throws IOException, ValidationException, ParseException {
+
+		Calendar iCal = new Calendar();
+		iCal.getProperties().add(new ProdId("-//Project-Orgaznier//ICalendar 1.0//EN"));
+		iCal.getProperties().add(Version.VERSION_2_0);
+		iCal.getProperties().add(CalScale.GREGORIAN);
+				
+		VEvent eventICal = new VEvent();		
+		eventICal.getProperties().add(new Uid(event.getIndex().toString()));				
+		final DtStart dtStart = new DtStart(new net.fortuna.ical4j.model.DateTime(event.getStartDate()));
+		eventICal.getProperties().add(dtStart);		
+		final DtEnd dtEnd = new DtEnd(new net.fortuna.ical4j.model.DateTime(event.getEndDate()));
+		eventICal.getProperties().add(dtEnd);					
+		eventICal.getProperties().add(new Summary(event.getTitle()));
+		eventICal.getProperties().add(new Location(event.getLocation()));			
+		eventICal.getProperties().add(new Description(event.getDescription()));				
+		
+		if (event.getAlarmDateTime() != null) { 			
+			DateTime alarmDateTime = new DateTime(parseDateToString(event.getAlarmDateTime()), "yyyy-MM-dd HH:mm:ss", null);
+			VAlarm alarmICal = new VAlarm(alarmDateTime);			
+			alarmICal.getProperties().add(Action.AUDIO);
+			eventICal.getAlarms().add(alarmICal);	
+		}
+		
+		iCal.getComponents().add(eventICal);		
+		File exportIcsFile = new File(filename);
+		
+		if (!exportIcsFile.exists()) {
+			exportIcsFile.createNewFile();
+        }
+		
+		FileOutputStream iCalendarOut = new FileOutputStream(exportIcsFile);
+		CalendarOutputter outputter = new CalendarOutputter();
+		outputter.output(iCal, iCalendarOut);
+		iCalendarOut.close();
 	}
 
 	public static String parseDateToString(Date date) {

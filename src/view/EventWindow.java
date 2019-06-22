@@ -366,6 +366,7 @@ public class EventWindow {
 					} catch (ParseException e2) {
 						e2.printStackTrace();
 					}
+				
 				try {
 					eventManager.addEvent(titleValue, descriptionValue, locationValue, startDate, endDate, alarmDateTimeValue);
 					showPane("Success", "Event created successfully");

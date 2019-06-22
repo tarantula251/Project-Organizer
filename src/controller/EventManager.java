@@ -37,6 +37,7 @@ import model.exception.EventEmptyFieldException;
 import model.exception.EventInvalidDateException;
 import model.exception.EventInvalidTimeException;
 import model.exception.TimerDateTimeException;
+import net.fortuna.ical4j.model.ValidationException;
 import view.EventWindow;
 import view.MainWindow;
 
@@ -59,6 +60,10 @@ public class EventManager {
 	 * 	Pole directory okreÅ›lajÄ…ce folder zawierajÄ…cy bazÄ™ danych
 	 */
 	private String directory = "databank";
+	
+	private String directoryExport = "export";
+	
+	private String iCalendarFilename = "icalendar.ics";
 	/**
 	 * 	Pole eventsFilename okreÅ›lajÄ…ce nazwÄ™ pliku XML z danymi
 	 */
@@ -193,7 +198,7 @@ public class EventManager {
 	 * @throws SAXException - wyjątek zostaje rzucony, gdy nastąpi błąd parsowania pliku XML   
 	 * @throws IOException - wyjątek zostaje rzucony, gdy nastąpi błąd związany z otwarciem pliku do zapisu
 	 */
-	private void sendDataToXml(Event event, String filename) throws SAXException, IOException {
+	private void sendDataToXml(Event event, String filename) throws SAXException, IOException {		
 		dataIo.writeToXml(event, filename);
 		if (eventCollection.size() > 1) {
 			for (Event existingEvent : eventCollection) {
@@ -223,7 +228,7 @@ public class EventManager {
 			throws EventManagerException {
 		try {
 			Event event = new Event(titleValue, descriptionValue, locationValue, startDateValue, endDateValue, alarmDateTimeValue);
-			eventCollection.add(event);
+			eventCollection.add(event);					
 			eventCollection.sort(null);
 			int id = dataIo.insertEventToDatabase(event);
 			if(id == 0) throw new EventManagerException("Invalid ID returned from database.");
@@ -377,6 +382,15 @@ public class EventManager {
 		TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<DefaultTableModel>(model);
 		table.setRowSorter(sorter);
 		sorter.setRowFilter(RowFilter.regexFilter(field));
+	}
+	
+	public void exportToICalendar(int eventId, String filename) throws IOException, ValidationException, ParseException {
+		for (Event event :  eventCollection) {
+			if (event.getIndex() == eventId) {				
+				dataIo.saveICalendar(event, filename);
+				return;
+			}
+		}
 	}
 
 }
