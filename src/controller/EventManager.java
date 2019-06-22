@@ -82,15 +82,16 @@ public class EventManager {
 	 * @throws EventInvalidTimeException - wyjÄ…tek zostaje rzucony, gdy nastÄ…pi bÅ‚Ä…d zwiÄ…zany z utworzeniem EventÃ³w z zaimportowanego pliku XML
 	 * @throws TimerDateTimeException - wyjÄ…tek zostaje rzucony, gdy nastÄ…pi bÅ‚Ä…d zwiÄ…zany z utworzeniem EventÃ³w z zaimportowanego pliku XML
 	 * @throws EventManagerException - wyjątek zostje rzucony, gdy nastąpi błąd ogólny modułu zarządzającego (np. bład odczytu konfiguracji)
+	 * @throws SQLException 
 	 */
 	public EventManager(MainWindow mainWindow)
 			throws LineUnavailableException, IOException, UnsupportedAudioFileException, ParseException,
-			EventEmptyFieldException, EventInvalidDateException, EventInvalidTimeException, TimerDateTimeException, EventManagerException {
+			EventEmptyFieldException, EventInvalidDateException, EventInvalidTimeException, TimerDateTimeException, EventManagerException, SQLException {
 		this.mainWindow = mainWindow;
 
 		loadConfig();
 		if(connectToDatabase()) importEventsFromDatabase();
-		else importEventsFromXml();
+	//	else importEventsFromXml();
 
 		clip = AudioSystem.getClip();
 		AudioInputStream inputStream = AudioSystem.getAudioInputStream(new File("resources/alarm.wav"));
@@ -332,10 +333,12 @@ public class EventManager {
 	 * @throws EventInvalidDateException - wyjÄ…tek zostaje rzucony, gdy nastÄ…pi bÅ‚Ä…d zwiÄ…zany z pobraniem Eventu z bazy
 	 * @throws EventInvalidTimeException - wyjÄ…tek zostaje rzucony, gdy nastÄ…pi bÅ‚Ä…d zwiÄ…zany z pobraniem Eventu z bazy
 	 * @throws TimerDateTimeException - wyjÄ…tek zostaje rzucony, gdy nastÄ…pi bÅ‚Ä…d zwiÄ…zany z pobraniem Eventu z bazy
+	 * @throws IOException 
+	 * @throws SQLException 
 	 */
-	private void importEventsFromXml() throws ParseException, EventEmptyFieldException, EventInvalidDateException,
-			EventInvalidTimeException, TimerDateTimeException {
-		NodeList nList = dataIo.getNodeListFromXml();
+	public void importEventsFromXml(String filename) throws ParseException, EventEmptyFieldException, EventInvalidDateException,
+			EventInvalidTimeException, TimerDateTimeException, SQLException, IOException {
+		NodeList nList = dataIo.getNodeListFromXml(filename);
 		if (nList != null) {
 			for (int item = 0; item < nList.getLength(); item++) {
 
@@ -344,7 +347,6 @@ public class EventManager {
 				if (nNode.getNodeType() == Node.ELEMENT_NODE) {
 					Element eElement = (Element) nNode;
 					String title, description, location, startDateValue, endDateValue, timerDateTime = "";
-					Integer index;
 					title = eElement.getElementsByTagName("title").item(0).getTextContent();
 					description = eElement.getElementsByTagName("description").item(0).getTextContent();
 					location = eElement.getElementsByTagName("location").item(0).getTextContent();
@@ -362,9 +364,9 @@ public class EventManager {
 						timerDate = DataIO.parseStringToDate(timerDateTime);
 
 					Event fetchedEvent = new Event(title, description, location, startDate, endDate, timerDate);
-					index = Integer.parseInt(eElement.getAttribute("id"));
-					fetchedEvent.setIndex(index);
-
+					int fetchedEventIndex = dataIo.insertEventToDatabase(fetchedEvent);
+					fetchedEvent.setIndex(fetchedEventIndex);
+				
 					eventCollection.add(fetchedEvent);
 				}
 			}

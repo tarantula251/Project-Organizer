@@ -88,6 +88,7 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 	private JMenu gExport;
 	private JMenuItem gICalendar;
 	private JMenuItem gXml;
+	private JMenuItem gImport;
 
 	/**
 	 * Konstruktor tworzy obiekt klasy MainWindow, który jest głównym oknem
@@ -99,7 +100,7 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 	public MainWindow() throws Exception {
 		try {
 			eventManager = new EventManager(this);
-			//initialize();
+	//		initialize();
 		} catch (LineUnavailableException e) {
 			JOptionPane.showMessageDialog(null, e.getMessage(), "LineUnavailableException", JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();
@@ -361,6 +362,11 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 		gXml.setMnemonic(KeyEvent.VK_X);
 		gXml.addActionListener(this);
 		gExport.add(gXml);
+		
+		gImport = new JMenuItem("Import...");
+		gImport.addActionListener(this);
+		menu.add(gImport);
+		gImport.setMnemonic(KeyEvent.VK_I);
 		menu.add(gAbout);
 
 		gExit = new JMenuItem("Exit");
@@ -504,6 +510,27 @@ public class MainWindow implements MenuListener, ActionListener, KeyListener {
 					eventManager.sendDataToXml(eventId, exportFilename);										
 				}
 			}
+		}
+		
+		if (e.getSource().equals(gImport)) {	
+			try {
+				String importFilename = null;
+				JFileChooser openFileDialog = new JFileChooser();
+				openFileDialog.setFileFilter(new FileNameExtensionFilter("XML file", "xml"));				
+				int dialogResult = openFileDialog.showSaveDialog(window);
+				if (dialogResult == JFileChooser.APPROVE_OPTION) {							
+					String filename = openFileDialog.getSelectedFile().getName();																						
+					importFilename = openFileDialog.getCurrentDirectory().toString() + "/" + filename;
+				}
+				if (importFilename == null)
+					return;
+				eventManager.importEventsFromXml(importFilename);
+				refreshEventsTable();						
+			} catch (ParseException | EventEmptyFieldException | EventInvalidDateException | EventInvalidTimeException
+					| TimerDateTimeException | SQLException | IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}			
 		}
 	}
 

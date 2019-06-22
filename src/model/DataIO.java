@@ -250,26 +250,16 @@ public class DataIO {
 	 * Metoda pobiera listę węzłów z pliku XML, w którym przechowywane są dane o Eventach                  
 	 * @return NodeList - obiekt przechowujący listę węzłów zawierających dane o Eventach
 	 */
-	public NodeList getNodeListFromXml() {
+	public NodeList getNodeListFromXml(String filename) {
 		NodeList nList = null;
 
 		try {
-			File dir = new File("databank");
-			FilenameFilter filter = new FilenameFilter() {
-				public boolean accept(File dir, String name) {
-					return name.equalsIgnoreCase("data.xml");
-				}
-			};
-			String[] fetchedDataFile = dir.list(filter);
-
-			if (fetchedDataFile != null) {
-				setDataFile(new File(dir + "/data.xml"));
-				DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-				DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-				Document doc = dBuilder.parse("databank/" + fetchedDataFile[0]);
-				doc.getDocumentElement().normalize();
-				nList = doc.getElementsByTagName("Event");
-			}
+			setDataFile(new File(filename));
+			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+			Document doc = dBuilder.parse(filename);
+			doc.getDocumentElement().normalize();
+			nList = doc.getElementsByTagName("Event");			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
