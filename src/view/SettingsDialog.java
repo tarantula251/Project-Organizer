@@ -232,6 +232,6 @@ public class SettingsDialog extends JDialog {
 		config.put("port", spinnerPort.getValue().toString());
 		config.put("database", textFieldDatabase.getText());
 		config.put("username", textFieldUsername.getText());
-		config.put("passowrd", new String(passwordField.getPassword()));
+		config.put("password", new String(passwordField.getPassword()));
 	}
 }
